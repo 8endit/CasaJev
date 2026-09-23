@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "casajev"
+version = "0.5.1"
+description = "Bounded local decision harness with verified tools and real-time control."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
+authors = [{name = "Benjamin Weise"}]
+requires-python = ">=3.11"
+dependencies = ["jsonschema==4.26.0", "playwright==1.58.0"]
+keywords = ["agent", "decision-model", "local-ai", "realtime", "harness"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Operating System :: MacOS",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.optional-dependencies]
+test = ["pytest==9.0.2"]
+local = [
+  "laya==0.3.4",
+  "numpy>=1.26,<2",
+  "transformers>=4.45,<5",
+  "torch==2.2.2; sys_platform == 'darwin'",
+  "torch>=2,<2.5; sys_platform != 'darwin'",
+]
+
+[project.scripts]
+casajev = "casajev.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["casajev*"]
+
+[tool.setuptools.package-data]
+casajev = ["static/*.html", "static/*.js", "static/*.css"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

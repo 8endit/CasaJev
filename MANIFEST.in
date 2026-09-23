@@ -1,0 +1,9 @@
+include CHANGELOG.md
+include CONTRIBUTING.md
+include HARNESS-0.5.md
+include HARNESS-0.5.1.md
+include LAYA-EVAL.md
+include SECURITY.md
+include start-casajev.sh
+include Start-CasaJev.ps1
+include *.command

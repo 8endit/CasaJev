@@ -1,0 +1,310 @@
+{
+  "csv_exact_duplicate_groups_ad9e20cc6a_22743646": {
+    "id": "csv_exact_duplicate_groups_ad9e20cc6a_22743646",
+    "spec": {
+      "description": "Find exact duplicate full CSV records; preserve case, whitespace and numeric text. Header excluded; one-based record indices.",
+      "examples": [
+        {
+          "input": "name,code\nAda,01\nBob,1\nAda,01\nAda,1\nBob,1\n",
+          "output": {
+            "extra_duplicates": 2,
+            "groups": [
+              [
+                1,
+                3
+              ],
+              [
+                2,
+                5
+              ]
+            ],
+            "records": 5
+          }
+        },
+        {
+          "input": "name\nAda\nada\n Ada\n",
+          "output": {
+            "extra_duplicates": 0,
+            "groups": [],
+            "records": 3
+          }
+        },
+        {
+          "input": "a,b\n\"x,y\",\"one\ntwo\"\n\"x,y\",\"one\ntwo\"\n",
+          "output": {
+            "extra_duplicates": 1,
+            "groups": [
+              [
+                1,
+                2
+              ]
+            ],
+            "records": 2
+          }
+        },
+        {
+          "input": "",
+          "output": {
+            "extra_duplicates": 0,
+            "groups": [],
+            "records": 0
+          }
+        }
+      ],
+      "input_kind": "csv",
+      "input_schema": {
+        "maxLength": 200000,
+        "type": "string"
+      },
+      "name": "csv_exact_duplicate_groups",
+      "operation": "group",
+      "output_kind": "records",
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "extra_duplicates": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "groups": {
+            "items": {
+              "items": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            "type": "array"
+          },
+          "records": {
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "groups",
+          "records",
+          "extra_duplicates"
+        ],
+        "type": "object"
+      },
+      "permissions": [
+        "compute"
+      ],
+      "semantics": "Comma separated RFC-style CSV with first row header. Compare complete parsed string records exactly, without normalization. Return all groups of duplicate record indices in first-seen order, one-based excluding header, total record count and extra duplicate count. Reject inconsistent widths."
+    },
+    "source": "import csv\nimport io\n\ndef main(payload):\n    rows = list(csv.reader(io.StringIO(payload), strict=True))\n    if not rows:\n        return {\"groups\": [], \"records\": 0, \"extra_duplicates\": 0}\n    width = len(rows[0])\n    buckets = {}\n    for index, row in enumerate(rows[1:], 1):\n        if len(row) != width:\n            raise ValueError(\"Inconsistent number of columns\")\n        buckets.setdefault(tuple(row), []).append(index)\n    groups = [indexes for indexes in buckets.values() if len(indexes) > 1]\n    return {\"groups\": groups, \"records\": len(rows) - 1,\n            \"extra_duplicates\": sum(len(group) - 1 for group in groups)}\n",
+    "source_hash": "2274364635b9272dfcb47ff3d1de75ecfe0058259fc810f312d378071af9de8d",
+    "evidence": {
+      "assurance": "Contract examples and AST review; not proof of general correctness",
+      "checks": [
+        {
+          "input_hash": "0613d67d8f16fad5a1d3f0b7d2262deaff8868859cabe161b3317bedbbef7074",
+          "output_hash": "e8c79ee8e17dce4176b6959e3f010f40bf80faa97d4ee95f374d042186839aee"
+        },
+        {
+          "input_hash": "487f2e3c59e20c72eeb8fe0a77756fcdd9509e2e4745b9a2637966ce6a502a22",
+          "output_hash": "61375762c6b217800a85636e0fa341213545aa362a3a3ff698bc0d996565009b"
+        },
+        {
+          "input_hash": "df49db1f73321a62b163807be5494fc7ec70f1878c7d895454beb6cdeeee75c7",
+          "output_hash": "bd46f2193bc22131c48121d96195726a15f369f6d9f147065d0e580461c4ca5d"
+        },
+        {
+          "input_hash": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
+          "output_hash": "db7bb701125b4b75a8bef35c999023b25bfb57ee46d1f522bfac7b52307da5e3"
+        }
+      ],
+      "contract_hash": "ad9e20cc6a74d7da1600e7ab6f93316db9647a37a1ec7d64c425b5fd94e7096e",
+      "passed": true,
+      "sandbox": "macOS Seatbelt: home/temp read, write and network restrictions",
+      "source_hash": "2274364635b9272dfcb47ff3d1de75ecfe0058259fc810f312d378071af9de8d"
+    },
+    "active": 1
+  },
+  "sum_cents_by_category_935defe7f5_e61f5bc3": {
+    "id": "sum_cents_by_category_935defe7f5_e61f5bc3",
+    "spec": {
+      "description": "Summiert ganzzahlige Cent-Beträge nach exakt unverändertem Kategorienamen.",
+      "examples": [
+        {
+          "input": [
+            {
+              "amount_cents": 12000,
+              "category": "Hardware"
+            },
+            {
+              "amount_cents": 2500,
+              "category": "Software"
+            },
+            {
+              "amount_cents": -2000,
+              "category": "Hardware"
+            },
+            {
+              "amount_cents": 300,
+              "category": "hardware"
+            }
+          ],
+          "output": {
+            "Hardware": 10000,
+            "Software": 2500,
+            "hardware": 300
+          }
+        },
+        {
+          "input": [],
+          "output": {}
+        },
+        {
+          "input": [
+            {
+              "amount_cents": -7,
+              "category": " A"
+            },
+            {
+              "amount_cents": 4,
+              "category": "A"
+            },
+            {
+              "amount_cents": 7,
+              "category": " A"
+            },
+            {
+              "amount_cents": -2,
+              "category": ""
+            }
+          ],
+          "output": {
+            "": -2,
+            " A": 0,
+            "A": 4
+          }
+        }
+      ],
+      "input_kind": "transactions",
+      "input_schema": {
+        "items": {
+          "properties": {
+            "amount_cents": {
+              "type": "integer"
+            },
+            "category": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "category",
+            "amount_cents"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "name": "sum_cents_by_category",
+      "operation": "sum_by_exact_category",
+      "output_kind": "json",
+      "output_schema": {
+        "additionalProperties": {
+          "type": "integer"
+        },
+        "type": "object"
+      },
+      "permissions": [
+        "compute"
+      ],
+      "semantics": "main(payload) erhält unverändert eine Liste von Buchungsobjekten. Für jedes Objekt wird amount_cents zum Wert unter dem exakten String category addiert. Kategorienamen werden weder normalisiert noch gekürzt oder in ihrer Groß-/Kleinschreibung verändert. Negative und nullwertige Beträge werden mitgerechnet. Jede vorkommende Kategorie bleibt auch bei Summe null enthalten. Leere Eingabe ergibt {}. Zusätzliche Buchungsfelder werden ignoriert. Verwende ausschließlich reine Python-Datentransformationen mit exakter Ganzzahlarithmetik; gib das Ergebnis als JSON-Objekt zurück."
+    },
+    "source": "def main(payload):\n    totals = {}\n    for transaction in payload:\n        category = transaction['category']\n        totals[category] = totals.get(category, 0) + transaction['amount_cents']\n    return totals\n",
+    "source_hash": "e61f5bc30c837aa555366d57815bca4597be56cfaddbba9ed2f1e426eed28919",
+    "evidence": {
+      "assurance": "Contract examples and AST review; not proof of general correctness",
+      "checks": [
+        {
+          "input_hash": "f114e8d47ac6e2ee673162f088608315e3fb0561fd9c79a4a9efa101f394306b",
+          "output_hash": "a83754c1dbc6197e5c71a6d86ac955c0bf586884a0749127e7a5750771697338"
+        },
+        {
+          "input_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "output_hash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+        },
+        {
+          "input_hash": "6ecc2b2c203ab07956b97b5935110b09faf25b9e62d6a6cfc4c32de115fed406",
+          "output_hash": "f9548517e8b0a60ee11fd9003b05a84862676062c544ae2e0c9a531079993eac"
+        }
+      ],
+      "contract_hash": "935defe7f54eb8d10c7d7ae479cf7b8f20b3c2b4a2f587019f2fc014c338d312",
+      "passed": true,
+      "sandbox": "macOS Seatbelt: home/temp read, write and network restrictions",
+      "source_hash": "e61f5bc30c837aa555366d57815bca4597be56cfaddbba9ed2f1e426eed28919"
+    },
+    "active": 1
+  },
+  "sort_numbers_3272c2c185_e4fa87b0": {
+    "id": "sort_numbers_3272c2c185_e4fa87b0",
+    "spec": {
+      "description": "Sort a list of numbers ascending; preserve duplicates.",
+      "examples": [
+        {
+          "input": [
+            3,
+            1,
+            3,
+            -2
+          ],
+          "output": [
+            -2,
+            1,
+            3,
+            3
+          ]
+        },
+        {
+          "input": [],
+          "output": []
+        }
+      ],
+      "input_kind": "numbers",
+      "input_schema": {
+        "items": {
+          "type": "number"
+        },
+        "maxItems": 10000,
+        "type": "array"
+      },
+      "name": "sort_numbers",
+      "operation": "sort",
+      "output_kind": "numbers",
+      "output_schema": {
+        "items": {
+          "type": "number"
+        },
+        "type": "array"
+      },
+      "permissions": [
+        "compute"
+      ],
+      "semantics": "Sort numeric input values ascending without removing duplicates."
+    },
+    "source": "def main(payload):\n    return sorted(payload)\n",
+    "source_hash": "e4fa87b094fb8ea372c6642f134fc0295f3ff3c32fa9e1c6143deddb9ba68bc9",
+    "evidence": {
+      "assurance": "Contract examples and AST review; not proof of general correctness",
+      "checks": [
+        {
+          "input_hash": "75a203f4c45feaccafffad5a1cccb843b7012a997328b3b2c5b4bcaed70b629c",
+          "output_hash": "3cd4e4dc7f8fe596cc9efe1b6a5113d1059d7928600126c4e310ad24163c87f9"
+        },
+        {
+          "input_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "output_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      ],
+      "contract_hash": "3272c2c18529382117b775f6bb1b49cdd391f2a066cdc775b7c04b7a29dde54f",
+      "passed": true,
+      "sandbox": "macOS Seatbelt: home/temp read, write and network restrictions",
+      "source_hash": "e4fa87b094fb8ea372c6642f134fc0295f3ff3c32fa9e1c6143deddb9ba68bc9"
+    },
+    "active": 1
+  }
+}

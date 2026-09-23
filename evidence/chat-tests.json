@@ -1,0 +1,37 @@
+[
+  {
+    "id": "e4dae988-ed56-4ba6-8545-721313dae0e0",
+    "messages": [
+      {
+        "attachments": [],
+        "role": "user",
+        "text": "Sortiere diese Zahlen aufsteigend: [8, 3, -1, 8, 0]"
+      },
+      {
+        "result": [
+          -1,
+          0,
+          3,
+          8,
+          8
+        ],
+        "role": "assistant",
+        "status": "done",
+        "task_id": "f4de5a7c6ae144c8",
+        "text": "Fertig."
+      },
+      {
+        "attachments": [
+          "Example Domains.txt"
+        ],
+        "role": "user",
+        "text": "Erkläre mir diese Seite in zwei kurzen Sätzen."
+      },
+      {
+        "role": "assistant",
+        "status": "done",
+        "text": "Die IANA hält Domains wie example.com und example.org für Beispiele in Dokumentationen bereit; sie können nicht registriert oder übertragen werden. Ihre Webseiten dienen nur der Information und sind nicht als verlässliche Grundlage für produktive Anwendungen gedacht."
+      }
+    ]
+  }
+]

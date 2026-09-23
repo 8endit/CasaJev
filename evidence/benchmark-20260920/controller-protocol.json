@@ -1,0 +1,43 @@
+{
+  "date": "2026-09-20T12:41:47+00:00",
+  "case_hash": "1f080473786fca605abb22f2f113c9497b9c06c6cae1af08b0c25ac3c1a3e4d2",
+  "jev": "jev-1.13.0",
+  "models": [
+    "gpt-5.6-terra",
+    "gpt-5.6-sol"
+  ],
+  "reasoning": "low",
+  "repeats": "two different fixed inputs per task family",
+  "timing": "wall clock, includes provider/CLI startup, state writes, decisions, execution and completion",
+  "limits": {
+    "steps": 12,
+    "jev_calls": 12,
+    "builds": 0,
+    "builder_calls": 0
+  },
+  "graph": "same type-composition hints; Jev no-graph ablation also included",
+  "ordering": "rotating within each case; sequential calls, no concurrent load",
+  "scope": "warm-tool controller comparison, no chat routing, no code generation or browser comparison",
+  "tools": [
+    {
+      "name": "csv_exact_duplicate_groups",
+      "contract_hash": "ad9e20cc6a74d7da1600e7ab6f93316db9647a37a1ec7d64c425b5fd94e7096e",
+      "source_hash": "2274364635b9272dfcb47ff3d1de75ecfe0058259fc810f312d378071af9de8d"
+    },
+    {
+      "name": "sort_numbers",
+      "contract_hash": "3272c2c18529382117b775f6bb1b49cdd391f2a066cdc775b7c04b7a29dde54f",
+      "source_hash": "e4fa87b094fb8ea372c6642f134fc0295f3ff3c32fa9e1c6143deddb9ba68bc9"
+    },
+    {
+      "name": "sum_numbers",
+      "contract_hash": "ece780462e8ccc9a0cdd1cb10b88a06b0705e7f1260ed1c9ca6fc8128bc5b32d",
+      "source_hash": "1cb966b866510effa08d6d46c53cc507e5a814889210b3c248e2c4840bd31f1e"
+    },
+    {
+      "name": "positive_numbers",
+      "contract_hash": "527a47d10ebc7987929c9463a56b2e7abf5e5330e6455b6ac0a5bc5cf7a24c6f",
+      "source_hash": "35cb80a2d7dc0b1d71528067238c4ed038496ce5088b338e35cdb9376d281ddb"
+    }
+  ]
+}

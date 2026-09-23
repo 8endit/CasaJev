@@ -1,0 +1,44 @@
+{
+  "date": "2026-09-20",
+  "method": "Submitted through visible chat UI; browser and result visually verified",
+  "observed_google_blocker": "Google CAPTCHA shown; not solved or bypassed",
+  "messages": [
+    {
+      "role": "user",
+      "text": "Google IANA example domains und lies die offizielle Quelle."
+    },
+    {
+      "role": "assistant",
+      "text": "Google ist im Browser geöffnet, zeigt aber keine automatisch lesbaren Treffer. Falls ein Dialog oder eine Zugriffsprüfung erscheint, kannst du dort übernehmen.",
+      "status": "done",
+      "route": "browser_search",
+      "elapsed_seconds": 3.895,
+      "browser_seconds": 3.128,
+      "browser_steps": [
+        {
+          "seconds": 3.128,
+          "step": "Google geöffnet"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "text": "Öffne https://example.com und fasse die Seite in einem Satz zusammen."
+    },
+    {
+      "role": "assistant",
+      "text": "Die Seite „Example Domain“ erklärt, dass diese Domain ohne Genehmigung für Dokumentationsbeispiele genutzt werden kann und nicht für den operativen Einsatz gedacht ist.",
+      "status": "done",
+      "route": "read_page",
+      "elapsed_seconds": 7.207,
+      "browser_seconds": 0.225,
+      "sources": [
+        {
+          "retrieved_at": "2026-09-20T13:10:29+00:00",
+          "title": "Example Domain",
+          "url": "https://example.com/"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+[
+  {
+    "input": "Wer ist aktuell Bundeskanzler von Deutschland? Bitte mit offizieller Quelle.",
+    "response": {
+      "checked_at": "2026-09-20T12:50:35+00:00",
+      "elapsed_seconds": 29.077,
+      "role": "assistant",
+      "sources": [
+        {
+          "retrieved_at": "2026-09-20T12:50:35+00:00",
+          "title": "Friedrich Merz: Bundeskanzler | Bundesregierung",
+          "url": "https://www.bundesregierung.de/breg-de/bundesregierung/bundeskabinett/friedrich-merz-2342660"
+        },
+        {
+          "retrieved_at": "2026-09-20T12:50:35+00:00",
+          "title": "Neue Bundesregierung im Amt | Bundesregierung",
+          "url": "https://www.bundesregierung.de/breg-de/service/fragen-und-anworten/kanzlerwahl-regierungsbildung-2345072"
+        }
+      ],
+      "status": "done",
+      "text": "Aktuell ist **Friedrich Merz** Bundeskanzler Deutschlands. Laut offizieller Seite der Bundesregierung hat er das Amt seit dem **6. Mai 2025** inne. Seine Wahl und anschließende Ernennung am selben Tag sind ebenfalls offiziell dokumentiert.\n\nQuelle: [Bundesregierung – Friedrich Merz, Bundeskanzler](https://www.bundesregierung.de/breg-de/bundesregierung/bundeskabinett/friedrich-merz-2342660)\n\nEreignisdatum: 6. Mai 2025; den aktuellen Amtsstand habe ich heute, 20. September 2026, anhand der live abgerufenen Regierungsseite geprüft."
+    },
+    "conversation": "smoke-research-736c7623"
+  },
+  {
+    "input": "Nur den Namen bitte.",
+    "response": {
+      "elapsed_seconds": 7.188,
+      "role": "assistant",
+      "status": "done",
+      "text": "Friedrich Merz"
+    },
+    "conversation": "smoke-research-736c7623"
+  },
+  {
+    "input": "Übersetze ins Englische: Der Termin wurde auf Freitag verschoben.",
+    "response": {
+      "elapsed_seconds": 6.583,
+      "role": "assistant",
+      "status": "done",
+      "text": "The appointment has been moved to Friday."
+    },
+    "conversation": "smoke-writing-c176c481"
+  },
+  {
+    "input": "Etwas formeller bitte.",
+    "response": {
+      "elapsed_seconds": 8.457,
+      "role": "assistant",
+      "status": "done",
+      "text": "The meeting has been rescheduled for Friday."
+    },
+    "conversation": "smoke-writing-c176c481"
+  },
+  {
+    "input": "Lies https://example.com und fasse die Seite in einem Satz zusammen.",
+    "response": {
+      "browser_url": "https://example.com/",
+      "elapsed_seconds": 9.85,
+      "role": "assistant",
+      "sources": [
+        {
+          "retrieved_at": "2026-09-20T12:51:10+00:00",
+          "title": "Example Domain",
+          "url": "https://example.com/"
+        }
+      ],
+      "status": "done",
+      "text": "Die Seite „Example Domain“ erklärt, dass diese Domain für Dokumentationsbeispiele vorgesehen ist und nicht für operative Nutzung verwendet werden soll."
+    },
+    "conversation": "smoke-page-f2e1faa8"
+  },
+  {
+    "input": "Auf Englisch bitte.",
+    "response": {
+      "elapsed_seconds": 9.232,
+      "role": "assistant",
+      "status": "done",
+      "text": "The “Example Domain” page explains that the domain is intended for documentation examples and should not be used operationally."
+    },
+    "conversation": "smoke-page-f2e1faa8"
+  },
+  {
+    "input": "Filtere zuerst alle Zahlen strikt größer als null und summiere dann nur diese positiven Zahlen: [-4, 8, 0, 3, -2]",
+    "response": {
+      "elapsed_seconds": 3.467,
+      "result": 11,
+      "role": "assistant",
+      "status": "done",
+      "task_id": "5879a09d42a640dc",
+      "text": "Fertig."
+    },
+    "conversation": "smoke-compose-6ce9ab6c"
+  },
+  {
+    "input": "Berechne 19 Prozent von 249. Gib das numerische Ergebnis zurück.",
+    "response": {
+      "elapsed_seconds": 26.529,
+      "result": null,
+      "role": "assistant",
+      "status": "done",
+      "task_id": "1f687e40e5c94729",
+      "text": "Mir fehlt noch eine Angabe. Was soll das Ergebnis genau enthalten?"
+    },
+    "conversation": "smoke-percent-1dfa8354"
+  },
+  {
+    "input": "Sortiere bitte meine Kundendaten alphabetisch nach Nachname.",
+    "response": {
+      "elapsed_seconds": 8.396,
+      "role": "assistant",
+      "status": "done",
+      "text": "Bitte lade die Kundendaten hoch oder füge sie hier ein, damit ich sie nach Nachname sortieren kann."
+    },
+    "conversation": "smoke-missing-081e57d8"
+  },
+  {
+    "input": "Formuliere eine freundliche Terminabsage in zwei Sätzen. Der Termin ist morgen, ich bin krank.",
+    "response": {
+      "elapsed_seconds": 8.793,
+      "role": "assistant",
+      "status": "done",
+      "text": "Hallo, leider muss ich unseren Termin morgen absagen, da ich krank bin. Ich melde mich, sobald es mir besser geht, um einen neuen Termin zu vereinbaren."
+    },
+    "conversation": "smoke-draft-73755342"
+  }
+]

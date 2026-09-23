@@ -1,0 +1,1 @@
+{"goal":"Sortiere diese Zahlen aufsteigend. Behalte doppelte Zahlen bei.","objects":{"numbers":{"kind":"numbers","description":"Zu sortierende Zahlen","value":[4,1,-2,4,0]}},"acceptance":{"expected":[-2,0,1,4,4]}}

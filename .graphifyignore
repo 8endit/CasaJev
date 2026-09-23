@@ -1,0 +1,10 @@
+.casajev/
+.venv/
+.git/
+__pycache__/
+.pytest_cache/
+*.egg-info/
+evidence/
+graphify-out/
+*.env
+credentials*

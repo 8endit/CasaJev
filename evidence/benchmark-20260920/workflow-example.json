@@ -1,0 +1,226 @@
+{
+  "directed": true,
+  "multigraph": true,
+  "graph": {
+    "kind": "runtime_workflows",
+    "schema_version": 1,
+    "provenance": "active verified registry and completed task observations",
+    "source_fingerprint": "3b4bb48d503b8ce79f7ff95d50f49780f68a96c847c99aa2fda4e1bea4d5fcee"
+  },
+  "nodes": [
+    {
+      "id": "csv_exact_duplicate_groups_ad9e20cc6a_22743646",
+      "label": "csv_exact_duplicate_groups",
+      "type": "tool",
+      "description": "Find exact duplicate full CSV records; preserve case, whitespace and numeric text. Header excluded; one-based record indices.",
+      "source_file": "state.sqlite3",
+      "source_location": "tools:csv_exact_duplicate_groups_ad9e20cc6a_22743646",
+      "source_hash": "2274364635b9272dfcb47ff3d1de75ecfe0058259fc810f312d378071af9de8d",
+      "contract_hash": "ad9e20cc6a74d7da1600e7ab6f93316db9647a37a1ec7d64c425b5fd94e7096e",
+      "input_kind": "csv",
+      "output_kind": "records"
+    },
+    {
+      "id": "sort_numbers_3272c2c185_e4fa87b0",
+      "label": "sort_numbers",
+      "type": "tool",
+      "description": "Sort a list of numbers ascending; preserve duplicates.",
+      "source_file": "state.sqlite3",
+      "source_location": "tools:sort_numbers_3272c2c185_e4fa87b0",
+      "source_hash": "e4fa87b094fb8ea372c6642f134fc0295f3ff3c32fa9e1c6143deddb9ba68bc9",
+      "contract_hash": "3272c2c18529382117b775f6bb1b49cdd391f2a066cdc775b7c04b7a29dde54f",
+      "input_kind": "numbers",
+      "output_kind": "numbers"
+    },
+    {
+      "id": "sum_numbers_ece780462e_1cb966b8",
+      "label": "sum_numbers",
+      "type": "tool",
+      "description": "Sum a list of numbers and return the total.",
+      "source_file": "state.sqlite3",
+      "source_location": "tools:sum_numbers_ece780462e_1cb966b8",
+      "source_hash": "1cb966b866510effa08d6d46c53cc507e5a814889210b3c248e2c4840bd31f1e",
+      "contract_hash": "ece780462e8ccc9a0cdd1cb10b88a06b0705e7f1260ed1c9ca6fc8128bc5b32d",
+      "input_kind": "numbers",
+      "output_kind": "value"
+    },
+    {
+      "id": "positive_numbers_527a47d10e_35cb80a2",
+      "label": "positive_numbers",
+      "type": "tool",
+      "description": "Keep only numbers strictly greater than zero, preserving order and duplicates.",
+      "source_file": "state.sqlite3",
+      "source_location": "tools:positive_numbers_527a47d10e_35cb80a2",
+      "source_hash": "35cb80a2d7dc0b1d71528067238c4ed038496ce5088b338e35cdb9376d281ddb",
+      "contract_hash": "527a47d10ebc7987929c9463a56b2e7abf5e5330e6455b6ac0a5bc5cf7a24c6f",
+      "input_kind": "numbers",
+      "output_kind": "numbers"
+    },
+    {
+      "id": "kind:csv",
+      "label": "csv",
+      "type": "data_kind"
+    },
+    {
+      "id": "kind:numbers",
+      "label": "numbers",
+      "type": "data_kind"
+    },
+    {
+      "id": "kind:records",
+      "label": "records",
+      "type": "data_kind"
+    },
+    {
+      "id": "kind:value",
+      "label": "value",
+      "type": "data_kind"
+    },
+    {
+      "id": "workflow:a8c3f27e4e7448c6",
+      "label": "Filtere zuerst alle Zahlen strikt größer als null. Summiere dann ausschließlich diese positiven Zahlen. Gib nur die Summe zurück.",
+      "type": "workflow",
+      "steps": [
+        "positive_numbers_527a47d10e_35cb80a2",
+        "sum_numbers_ece780462e_1cb966b8"
+      ],
+      "verification": "independent_expected_result",
+      "source_file": "state.sqlite3",
+      "source_location": "tasks:a8c3f27e4e7448c6"
+    }
+  ],
+  "links": [
+    {
+      "source": "kind:csv",
+      "target": "csv_exact_duplicate_groups_ad9e20cc6a_22743646",
+      "relation": "accepts",
+      "confidence": "EXTRACTED",
+      "source_file": "state.sqlite3",
+      "source_location": "tools:csv_exact_duplicate_groups_ad9e20cc6a_22743646",
+      "weight": 1
+    },
+    {
+      "source": "csv_exact_duplicate_groups_ad9e20cc6a_22743646",
+      "target": "kind:records",
+      "relation": "produces",
+      "confidence": "EXTRACTED",
+      "source_file": "state.sqlite3",
+      "source_location": "tools:csv_exact_duplicate_groups_ad9e20cc6a_22743646",
+      "weight": 1
+    },
+    {
+      "source": "kind:numbers",
+      "target": "sort_numbers_3272c2c185_e4fa87b0",
+      "relation": "accepts",
+      "confidence": "EXTRACTED",
+      "source_file": "state.sqlite3",
+      "source_location": "tools:sort_numbers_3272c2c185_e4fa87b0",
+      "weight": 1
+    },
+    {
+      "source": "sort_numbers_3272c2c185_e4fa87b0",
+      "target": "kind:numbers",
+      "relation": "produces",
+      "confidence": "EXTRACTED",
+      "source_file": "state.sqlite3",
+      "source_location": "tools:sort_numbers_3272c2c185_e4fa87b0",
+      "weight": 1
+    },
+    {
+      "source": "kind:numbers",
+      "target": "sum_numbers_ece780462e_1cb966b8",
+      "relation": "accepts",
+      "confidence": "EXTRACTED",
+      "source_file": "state.sqlite3",
+      "source_location": "tools:sum_numbers_ece780462e_1cb966b8",
+      "weight": 1
+    },
+    {
+      "source": "sum_numbers_ece780462e_1cb966b8",
+      "target": "kind:value",
+      "relation": "produces",
+      "confidence": "EXTRACTED",
+      "source_file": "state.sqlite3",
+      "source_location": "tools:sum_numbers_ece780462e_1cb966b8",
+      "weight": 1
+    },
+    {
+      "source": "kind:numbers",
+      "target": "positive_numbers_527a47d10e_35cb80a2",
+      "relation": "accepts",
+      "confidence": "EXTRACTED",
+      "source_file": "state.sqlite3",
+      "source_location": "tools:positive_numbers_527a47d10e_35cb80a2",
+      "weight": 1
+    },
+    {
+      "source": "positive_numbers_527a47d10e_35cb80a2",
+      "target": "kind:numbers",
+      "relation": "produces",
+      "confidence": "EXTRACTED",
+      "source_file": "state.sqlite3",
+      "source_location": "tools:positive_numbers_527a47d10e_35cb80a2",
+      "weight": 1
+    },
+    {
+      "source": "sort_numbers_3272c2c185_e4fa87b0",
+      "target": "sum_numbers_ece780462e_1cb966b8",
+      "relation": "may_feed",
+      "confidence": "INFERRED",
+      "reason": "matching data kind only; actual schema and goal must still be checked",
+      "weight": 0.25
+    },
+    {
+      "source": "sort_numbers_3272c2c185_e4fa87b0",
+      "target": "positive_numbers_527a47d10e_35cb80a2",
+      "relation": "may_feed",
+      "confidence": "INFERRED",
+      "reason": "matching data kind only; actual schema and goal must still be checked",
+      "weight": 0.25
+    },
+    {
+      "source": "positive_numbers_527a47d10e_35cb80a2",
+      "target": "sort_numbers_3272c2c185_e4fa87b0",
+      "relation": "may_feed",
+      "confidence": "INFERRED",
+      "reason": "matching data kind only; actual schema and goal must still be checked",
+      "weight": 0.25
+    },
+    {
+      "source": "positive_numbers_527a47d10e_35cb80a2",
+      "target": "sum_numbers_ece780462e_1cb966b8",
+      "relation": "may_feed",
+      "confidence": "INFERRED",
+      "reason": "matching data kind only; actual schema and goal must still be checked",
+      "weight": 0.25
+    },
+    {
+      "source": "workflow:a8c3f27e4e7448c6",
+      "target": "positive_numbers_527a47d10e_35cb80a2",
+      "relation": "executed_step",
+      "step": 1,
+      "confidence": "EXTRACTED",
+      "source_file": "state.sqlite3",
+      "source_location": "tasks:a8c3f27e4e7448c6:observations:0",
+      "weight": 1
+    },
+    {
+      "source": "workflow:a8c3f27e4e7448c6",
+      "target": "sum_numbers_ece780462e_1cb966b8",
+      "relation": "executed_step",
+      "step": 2,
+      "confidence": "EXTRACTED",
+      "source_file": "state.sqlite3",
+      "source_location": "tasks:a8c3f27e4e7448c6:observations:1",
+      "weight": 1
+    },
+    {
+      "source": "positive_numbers_527a47d10e_35cb80a2",
+      "target": "sum_numbers_ece780462e_1cb966b8",
+      "relation": "observed_flow",
+      "confidence": "EXTRACTED",
+      "workflow": "workflow:a8c3f27e4e7448c6",
+      "weight": 1
+    }
+  ]
+}

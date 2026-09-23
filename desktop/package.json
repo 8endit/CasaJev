@@ -1,0 +1,17 @@
+{
+  "name": "casajev-desktop",
+  "productName": "CasaJev",
+  "version": "0.5.1",
+  "private": true,
+  "description": "CasaJev desktop shell with one visible, controlled browser",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "dev": "node dev.cjs",
+    "package:mac": "node build.cjs"
+  },
+  "devDependencies": {
+    "@electron/packager": "20.3.0",
+    "electron": "44.4.3"
+  }
+}

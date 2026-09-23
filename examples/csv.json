@@ -1,0 +1,6 @@
+{
+  "goal": "Finde alle vollständigen CSV-Datensätze, die exakt identisch sind. Vergleiche alle Spalten ohne Normalisierung. Liefere Gruppen der Datensatznummern (ab 1, ohne Kopfzeile), Datensatzanzahl und Anzahl zusätzlicher Duplikate. Verändere keine Daten.",
+  "objects": {"customer_csv": {"kind": "csv", "description": "Synthetische Beispieldaten mit Kopfzeile", "value": "name,code\nAda,01\nBob,1\nAda,01\nAda,1\nBob,1\n"}},
+  "permissions": ["compute"],
+  "acceptance": {"expected": {"groups": [[1,3],[2,5]], "records": 5, "extra_duplicates": 2}}
+}

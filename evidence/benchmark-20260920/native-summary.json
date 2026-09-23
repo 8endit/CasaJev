@@ -1,0 +1,12 @@
+{
+  "terra_native": {
+    "successes": 6,
+    "total": 6,
+    "median_seconds_successful": 16.839044484542683
+  },
+  "sol_native": {
+    "successes": 4,
+    "total": 6,
+    "median_seconds_successful": 13.005512147501577
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "created_at": "2026-09-20T13:50:51+00:00",
+  "cases_hash": "be2886375f11707457c02b600a3b78c7401ef5946eca465ad83418fcacfab68b",
+  "repeats": 2,
+  "arms": {
+    "jev_only": "No GPT object is constructed. Existing tools only.",
+    "assisted": "One Terra Low planning call; at most one uncertain-decision review. No new tools."
+  },
+  "limits": {
+    "steps": 12,
+    "jev_calls": 12,
+    "builder_calls": 1,
+    "builds": 0
+  },
+  "timing": "Per-task wall time includes planning, decisions, execution, outcome check and persistence. Tool verification is common setup, excluded.",
+  "models": {
+    "jev": "jev-1.13.0",
+    "gpt": "gpt-5.6-terra",
+    "reasoning": "low"
+  },
+  "graph": false,
+  "task_expected_values": "Kept only by local evaluator; not provided to either model or harness.",
+  "isolation": "Fresh registry and SQLite per case/arm/repeat. No live chat state. Alternating arm order.",
+  "preparation": "Original goal and objects stay unchanged, except the prose case permits exactly the source numbers to be structured; no precomputed outputs.",
+  "criteria": "Exact result for ready/preparation/recovery; explicit missing-data/ambiguity question, capability gap or invalid-input halt separately counted.",
+  "scope": "12 frozen synthetic cases; not a general intelligence, chat, memory, browser, swarm or tool-learning benchmark.",
+  "tool_hashes": [
+    {
+      "name": "csv_exact_duplicate_groups",
+      "contract": "ad9e20cc6a74d7da1600e7ab6f93316db9647a37a1ec7d64c425b5fd94e7096e",
+      "source": "2274364635b9272dfcb47ff3d1de75ecfe0058259fc810f312d378071af9de8d"
+    },
+    {
+      "name": "sort_numbers",
+      "contract": "3272c2c18529382117b775f6bb1b49cdd391f2a066cdc775b7c04b7a29dde54f",
+      "source": "e4fa87b094fb8ea372c6642f134fc0295f3ff3c32fa9e1c6143deddb9ba68bc9"
+    },
+    {
+      "name": "sum_numbers",
+      "contract": "ece780462e8ccc9a0cdd1cb10b88a06b0705e7f1260ed1c9ca6fc8128bc5b32d",
+      "source": "1cb966b866510effa08d6d46c53cc507e5a814889210b3c248e2c4840bd31f1e"
+    },
+    {
+      "name": "positive_numbers",
+      "contract": "527a47d10ebc7987929c9463a56b2e7abf5e5330e6455b6ac0a5bc5cf7a24c6f",
+      "source": "35cb80a2d7dc0b1d71528067238c4ed038496ce5088b338e35cdb9376d281ddb"
+    }
+  ],
+  "code_hashes": {
+    "autonomy_eval.py": "ba542ccec6909a08daee76405f8c05654205173b7c0e9d58aab4a4a0682e9460",
+    "engine.py": "1a86d85888a7eaeb7fca586375e06e21c2c6a8e37e3ca13d6aca7093157087ad",
+    "assistant.py": "d2377fef2f28b3c9f934ed8806a83426d6e32b90d770d7d5c96f51657ded03fe",
+    "jev.py": "1928eda8bfe02ad95dd643f6b860bf293feacaf761b25b0ebe1a844c7e0cdb21",
+    "builder.py": "b0e0936db3410538d97f89ff5d04a2ce415c6b4b0c30585267ee6d927e2acdc7",
+    "runner.py": "bdf9a4eceba46efbb0f23ae680d6f61c37db6304b929ea5ed344a0979cb8d5b9"
+  }
+}

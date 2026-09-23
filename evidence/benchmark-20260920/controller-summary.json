@@ -1,0 +1,37 @@
+{
+  "script": {
+    "successes": 6,
+    "total": 6,
+    "median_seconds_successful": 0.17858483752934262,
+    "min_seconds_successful": 0.1684232580009848,
+    "max_seconds_successful": 0.20530348701868206
+  },
+  "jev": {
+    "successes": 6,
+    "total": 6,
+    "median_seconds_successful": 1.797292837058194,
+    "min_seconds_successful": 1.68728843703866,
+    "max_seconds_successful": 2.6739516799570993
+  },
+  "terra": {
+    "successes": 6,
+    "total": 6,
+    "median_seconds_successful": 13.133575260522775,
+    "min_seconds_successful": 11.167823796044104,
+    "max_seconds_successful": 19.799952073954046
+  },
+  "sol": {
+    "successes": 6,
+    "total": 6,
+    "median_seconds_successful": 12.119878822471946,
+    "min_seconds_successful": 10.729259014013223,
+    "max_seconds_successful": 17.20840440399479
+  },
+  "jev_no_graph": {
+    "successes": 6,
+    "total": 6,
+    "median_seconds_successful": 1.7693664219696075,
+    "min_seconds_successful": 1.633149489061907,
+    "max_seconds_successful": 2.7084182359976694
+  }
+}

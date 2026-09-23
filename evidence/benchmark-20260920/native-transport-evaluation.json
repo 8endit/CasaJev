@@ -1,0 +1,194 @@
+[
+  {
+    "case": "sort_a",
+    "agent": "terra_native",
+    "seconds": 16.54455929901451,
+    "original_format_passed": true,
+    "transport_unwrapped": false,
+    "result_after_transport_decode": [
+      -8,
+      -3,
+      0,
+      2,
+      9,
+      17,
+      17
+    ],
+    "content_correct": true
+  },
+  {
+    "case": "sort_a",
+    "agent": "sol_native",
+    "seconds": 10.779269110993482,
+    "original_format_passed": false,
+    "transport_unwrapped": true,
+    "result_after_transport_decode": [
+      -8,
+      -3,
+      0,
+      2,
+      9,
+      17,
+      17
+    ],
+    "content_correct": true
+  },
+  {
+    "case": "csv_a",
+    "agent": "sol_native",
+    "seconds": 12.924641291960143,
+    "original_format_passed": true,
+    "transport_unwrapped": false,
+    "result_after_transport_decode": {
+      "extra_duplicates": 2,
+      "groups": [
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          5
+        ]
+      ],
+      "records": 5
+    },
+    "content_correct": true
+  },
+  {
+    "case": "csv_a",
+    "agent": "terra_native",
+    "seconds": 15.009248899994418,
+    "original_format_passed": true,
+    "transport_unwrapped": false,
+    "result_after_transport_decode": {
+      "extra_duplicates": 2,
+      "groups": [
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          5
+        ]
+      ],
+      "records": 5
+    },
+    "content_correct": true
+  },
+  {
+    "case": "compose_a",
+    "agent": "terra_native",
+    "seconds": 19.46286859898828,
+    "original_format_passed": true,
+    "transport_unwrapped": false,
+    "result_after_transport_decode": 26,
+    "content_correct": true
+  },
+  {
+    "case": "compose_a",
+    "agent": "sol_native",
+    "seconds": 13.08638300304301,
+    "original_format_passed": true,
+    "transport_unwrapped": false,
+    "result_after_transport_decode": 26,
+    "content_correct": true
+  },
+  {
+    "case": "sort_b",
+    "agent": "sol_native",
+    "seconds": 13.366945010027848,
+    "original_format_passed": false,
+    "transport_unwrapped": true,
+    "result_after_transport_decode": [
+      -2,
+      -2,
+      0,
+      4.5,
+      4.5,
+      8,
+      100
+    ],
+    "content_correct": true
+  },
+  {
+    "case": "sort_b",
+    "agent": "terra_native",
+    "seconds": 15.866942106978968,
+    "original_format_passed": true,
+    "transport_unwrapped": false,
+    "result_after_transport_decode": [
+      -2,
+      -2,
+      0,
+      4.5,
+      4.5,
+      8,
+      100
+    ],
+    "content_correct": true
+  },
+  {
+    "case": "csv_b",
+    "agent": "terra_native",
+    "seconds": 17.133529670070857,
+    "original_format_passed": true,
+    "transport_unwrapped": false,
+    "result_after_transport_decode": {
+      "extra_duplicates": 2,
+      "groups": [
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "records": 5
+    },
+    "content_correct": true
+  },
+  {
+    "case": "csv_b",
+    "agent": "sol_native",
+    "seconds": 11.647847578977235,
+    "original_format_passed": true,
+    "transport_unwrapped": false,
+    "result_after_transport_decode": {
+      "extra_duplicates": 2,
+      "groups": [
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "records": 5
+    },
+    "content_correct": true
+  },
+  {
+    "case": "compose_b",
+    "agent": "sol_native",
+    "seconds": 13.682128298911266,
+    "original_format_passed": true,
+    "transport_unwrapped": false,
+    "result_after_transport_decode": 16,
+    "content_correct": true
+  },
+  {
+    "case": "compose_b",
+    "agent": "terra_native",
+    "seconds": 18.112749207997695,
+    "original_format_passed": true,
+    "transport_unwrapped": false,
+    "result_after_transport_decode": 16,
+    "content_correct": true
+  }
+]

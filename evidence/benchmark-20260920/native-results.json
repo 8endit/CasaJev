@@ -1,0 +1,818 @@
+[
+  {
+    "case": "sort_a",
+    "agent": "terra_native",
+    "seconds": 16.54455929901451,
+    "success": true,
+    "result": [
+      -8,
+      -3,
+      0,
+      2,
+      9,
+      17,
+      17
+    ],
+    "error": null,
+    "evidence": {
+      "backend": "codex exec",
+      "model": "gpt-5.6-terra",
+      "reasoning": "low",
+      "usage": [
+        {
+          "input_tokens": 51888,
+          "cached_input_tokens": 30208,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 186,
+          "reasoning_output_tokens": 20
+        }
+      ],
+      "exit_code": 0,
+      "seconds": 16.54259543598164,
+      "web_searches": [],
+      "tool_calls": [
+        {
+          "id": "item_1",
+          "type": "mcp_tool_call",
+          "server": "casajev",
+          "tool": "sort_numbers",
+          "arguments": {
+            "payload": [
+              17,
+              -8,
+              2,
+              17,
+              0,
+              -3,
+              9
+            ]
+          },
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "[-8,-3,0,2,9,17,17]"
+              }
+            ],
+            "structured_content": null
+          },
+          "error": null,
+          "status": "completed"
+        }
+      ]
+    },
+    "date": "2026-09-20T12:46:04+00:00"
+  },
+  {
+    "case": "sort_a",
+    "agent": "sol_native",
+    "seconds": 10.779269110993482,
+    "success": false,
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "[-8,-3,0,2,9,17,17]"
+        }
+      ],
+      "isError": false
+    },
+    "error": null,
+    "evidence": {
+      "backend": "codex exec",
+      "model": "gpt-5.6-sol",
+      "reasoning": "low",
+      "usage": [
+        {
+          "input_tokens": 52954,
+          "cached_input_tokens": 31232,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 211,
+          "reasoning_output_tokens": 74
+        }
+      ],
+      "exit_code": 0,
+      "seconds": 10.77788241498638,
+      "web_searches": [],
+      "tool_calls": [
+        {
+          "id": "item_0",
+          "type": "mcp_tool_call",
+          "server": "casajev",
+          "tool": "sort_numbers",
+          "arguments": {
+            "payload": [
+              17,
+              -8,
+              2,
+              17,
+              0,
+              -3,
+              9
+            ]
+          },
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "[-8,-3,0,2,9,17,17]"
+              }
+            ],
+            "structured_content": null
+          },
+          "error": null,
+          "status": "completed"
+        }
+      ]
+    },
+    "date": "2026-09-20T12:46:14+00:00"
+  },
+  {
+    "case": "csv_a",
+    "agent": "sol_native",
+    "seconds": 12.924641291960143,
+    "success": true,
+    "result": {
+      "extra_duplicates": 2,
+      "groups": [
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          5
+        ]
+      ],
+      "records": 5
+    },
+    "error": null,
+    "evidence": {
+      "backend": "codex exec",
+      "model": "gpt-5.6-sol",
+      "reasoning": "low",
+      "usage": [
+        {
+          "input_tokens": 52058,
+          "cached_input_tokens": 30848,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 275,
+          "reasoning_output_tokens": 39
+        }
+      ],
+      "exit_code": 0,
+      "seconds": 12.923400391009636,
+      "web_searches": [],
+      "tool_calls": [
+        {
+          "id": "item_1",
+          "type": "mcp_tool_call",
+          "server": "casajev",
+          "tool": "csv_exact_duplicate_groups",
+          "arguments": {
+            "payload": "name,code\nAda,01\nBob,2\nAda,01\nAda,1\nBob,2\n"
+          },
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "{\"extra_duplicates\":2,\"groups\":[[1,3],[2,5]],\"records\":5}"
+              }
+            ],
+            "structured_content": null
+          },
+          "error": null,
+          "status": "completed"
+        }
+      ]
+    },
+    "date": "2026-09-20T12:46:27+00:00"
+  },
+  {
+    "case": "csv_a",
+    "agent": "terra_native",
+    "seconds": 15.009248899994418,
+    "success": true,
+    "result": {
+      "extra_duplicates": 2,
+      "groups": [
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          5
+        ]
+      ],
+      "records": 5
+    },
+    "error": null,
+    "evidence": {
+      "backend": "codex exec",
+      "model": "gpt-5.6-terra",
+      "reasoning": "low",
+      "usage": [
+        {
+          "input_tokens": 48727,
+          "cached_input_tokens": 28160,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 180,
+          "reasoning_output_tokens": 11
+        }
+      ],
+      "exit_code": 0,
+      "seconds": 15.007909390958957,
+      "web_searches": [],
+      "tool_calls": [
+        {
+          "id": "item_1",
+          "type": "mcp_tool_call",
+          "server": "casajev",
+          "tool": "csv_exact_duplicate_groups",
+          "arguments": {
+            "payload": "name,code\nAda,01\nBob,2\nAda,01\nAda,1\nBob,2\n"
+          },
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "{\"extra_duplicates\":2,\"groups\":[[1,3],[2,5]],\"records\":5}"
+              }
+            ],
+            "structured_content": null
+          },
+          "error": null,
+          "status": "completed"
+        }
+      ]
+    },
+    "date": "2026-09-20T12:46:42+00:00"
+  },
+  {
+    "case": "compose_a",
+    "agent": "terra_native",
+    "seconds": 19.46286859898828,
+    "success": true,
+    "result": 26,
+    "error": null,
+    "evidence": {
+      "backend": "codex exec",
+      "model": "gpt-5.6-terra",
+      "reasoning": "low",
+      "usage": [
+        {
+          "input_tokens": 71941,
+          "cached_input_tokens": 60416,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 212,
+          "reasoning_output_tokens": 17
+        }
+      ],
+      "exit_code": 0,
+      "seconds": 19.461624932009727,
+      "web_searches": [],
+      "tool_calls": [
+        {
+          "id": "item_1",
+          "type": "mcp_tool_call",
+          "server": "casajev",
+          "tool": "positive_numbers",
+          "arguments": {
+            "payload": [
+              -19,
+              7,
+              0,
+              12,
+              -3,
+              7
+            ]
+          },
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "[7,12,7]"
+              }
+            ],
+            "structured_content": null
+          },
+          "error": null,
+          "status": "completed"
+        },
+        {
+          "id": "item_2",
+          "type": "mcp_tool_call",
+          "server": "casajev",
+          "tool": "sum_numbers",
+          "arguments": {
+            "payload": [
+              7,
+              12,
+              7
+            ]
+          },
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "26"
+              }
+            ],
+            "structured_content": null
+          },
+          "error": null,
+          "status": "completed"
+        }
+      ]
+    },
+    "date": "2026-09-20T12:47:02+00:00"
+  },
+  {
+    "case": "compose_a",
+    "agent": "sol_native",
+    "seconds": 13.08638300304301,
+    "success": true,
+    "result": 26,
+    "error": null,
+    "evidence": {
+      "backend": "codex exec",
+      "model": "gpt-5.6-sol",
+      "reasoning": "low",
+      "usage": [
+        {
+          "input_tokens": 43519,
+          "cached_input_tokens": 21120,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 182,
+          "reasoning_output_tokens": 43
+        }
+      ],
+      "exit_code": 0,
+      "seconds": 13.085040536010638,
+      "web_searches": [],
+      "tool_calls": [
+        {
+          "id": "item_0",
+          "type": "mcp_tool_call",
+          "server": "casajev",
+          "tool": "positive_numbers",
+          "arguments": {
+            "payload": [
+              -19,
+              7,
+              0,
+              12,
+              -3,
+              7
+            ]
+          },
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "[7,12,7]"
+              }
+            ],
+            "structured_content": null
+          },
+          "error": null,
+          "status": "completed"
+        },
+        {
+          "id": "item_1",
+          "type": "mcp_tool_call",
+          "server": "casajev",
+          "tool": "sum_numbers",
+          "arguments": {
+            "payload": [
+              7,
+              12,
+              7
+            ]
+          },
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "26"
+              }
+            ],
+            "structured_content": null
+          },
+          "error": null,
+          "status": "completed"
+        }
+      ]
+    },
+    "date": "2026-09-20T12:47:15+00:00"
+  },
+  {
+    "case": "sort_b",
+    "agent": "sol_native",
+    "seconds": 13.366945010027848,
+    "success": false,
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "[-2,-2,0,4.5,4.5,8,100]"
+        }
+      ],
+      "isError": false
+    },
+    "error": null,
+    "evidence": {
+      "backend": "codex exec",
+      "model": "gpt-5.6-sol",
+      "reasoning": "low",
+      "usage": [
+        {
+          "input_tokens": 52232,
+          "cached_input_tokens": 30848,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 232,
+          "reasoning_output_tokens": 81
+        }
+      ],
+      "exit_code": 0,
+      "seconds": 13.36554663698189,
+      "web_searches": [],
+      "tool_calls": [
+        {
+          "id": "item_0",
+          "type": "mcp_tool_call",
+          "server": "casajev",
+          "tool": "sort_numbers",
+          "arguments": {
+            "payload": [
+              4.5,
+              -2,
+              100,
+              4.5,
+              0,
+              -2,
+              8
+            ]
+          },
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "[-2,-2,0,4.5,4.5,8,100]"
+              }
+            ],
+            "structured_content": null
+          },
+          "error": null,
+          "status": "completed"
+        }
+      ]
+    },
+    "date": "2026-09-20T12:47:28+00:00"
+  },
+  {
+    "case": "sort_b",
+    "agent": "terra_native",
+    "seconds": 15.866942106978968,
+    "success": true,
+    "result": [
+      -2,
+      -2,
+      0,
+      4.5,
+      4.5,
+      8,
+      100
+    ],
+    "error": null,
+    "evidence": {
+      "backend": "codex exec",
+      "model": "gpt-5.6-terra",
+      "reasoning": "low",
+      "usage": [
+        {
+          "input_tokens": 32430,
+          "cached_input_tokens": 19968,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 181,
+          "reasoning_output_tokens": 11
+        }
+      ],
+      "exit_code": 0,
+      "seconds": 15.865104219992645,
+      "web_searches": [],
+      "tool_calls": [
+        {
+          "id": "item_1",
+          "type": "mcp_tool_call",
+          "server": "casajev",
+          "tool": "sort_numbers",
+          "arguments": {
+            "payload": [
+              4.5,
+              -2,
+              100,
+              4.5,
+              0,
+              -2,
+              8
+            ]
+          },
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "[-2,-2,0,4.5,4.5,8,100]"
+              }
+            ],
+            "structured_content": null
+          },
+          "error": null,
+          "status": "completed"
+        }
+      ]
+    },
+    "date": "2026-09-20T12:47:44+00:00"
+  },
+  {
+    "case": "csv_b",
+    "agent": "terra_native",
+    "seconds": 17.133529670070857,
+    "success": true,
+    "result": {
+      "extra_duplicates": 2,
+      "groups": [
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "records": 5
+    },
+    "error": null,
+    "evidence": {
+      "backend": "codex exec",
+      "model": "gpt-5.6-terra",
+      "reasoning": "low",
+      "usage": [
+        {
+          "input_tokens": 48773,
+          "cached_input_tokens": 28160,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 197,
+          "reasoning_output_tokens": 10
+        }
+      ],
+      "exit_code": 0,
+      "seconds": 17.131252428982407,
+      "web_searches": [],
+      "tool_calls": [
+        {
+          "id": "item_1",
+          "type": "mcp_tool_call",
+          "server": "casajev",
+          "tool": "csv_exact_duplicate_groups",
+          "arguments": {
+            "payload": "x,y\n\"a,b\",3\nA,4\n\"a,b\",3\nA,4\n A,4\n"
+          },
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "{\"extra_duplicates\":2,\"groups\":[[1,3],[2,4]],\"records\":5}"
+              }
+            ],
+            "structured_content": null
+          },
+          "error": null,
+          "status": "completed"
+        }
+      ]
+    },
+    "date": "2026-09-20T12:48:01+00:00"
+  },
+  {
+    "case": "csv_b",
+    "agent": "sol_native",
+    "seconds": 11.647847578977235,
+    "success": true,
+    "result": {
+      "extra_duplicates": 2,
+      "groups": [
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "records": 5
+    },
+    "error": null,
+    "evidence": {
+      "backend": "codex exec",
+      "model": "gpt-5.6-sol",
+      "reasoning": "low",
+      "usage": [
+        {
+          "input_tokens": 32539,
+          "cached_input_tokens": 21120,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 184,
+          "reasoning_output_tokens": 47
+        }
+      ],
+      "exit_code": 0,
+      "seconds": 11.645256043993868,
+      "web_searches": [],
+      "tool_calls": [
+        {
+          "id": "item_0",
+          "type": "mcp_tool_call",
+          "server": "casajev",
+          "tool": "csv_exact_duplicate_groups",
+          "arguments": {
+            "payload": "x,y\n\"a,b\",3\nA,4\n\"a,b\",3\nA,4\n A,4\n"
+          },
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "{\"extra_duplicates\":2,\"groups\":[[1,3],[2,4]],\"records\":5}"
+              }
+            ],
+            "structured_content": null
+          },
+          "error": null,
+          "status": "completed"
+        }
+      ]
+    },
+    "date": "2026-09-20T12:48:13+00:00"
+  },
+  {
+    "case": "compose_b",
+    "agent": "sol_native",
+    "seconds": 13.682128298911266,
+    "success": true,
+    "result": 16,
+    "error": null,
+    "evidence": {
+      "backend": "codex exec",
+      "model": "gpt-5.6-sol",
+      "reasoning": "low",
+      "usage": [
+        {
+          "input_tokens": 72288,
+          "cached_input_tokens": 51072,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 177,
+          "reasoning_output_tokens": 33
+        }
+      ],
+      "exit_code": 0,
+      "seconds": 13.68064576399047,
+      "web_searches": [],
+      "tool_calls": [
+        {
+          "id": "item_0",
+          "type": "mcp_tool_call",
+          "server": "casajev",
+          "tool": "positive_numbers",
+          "arguments": {
+            "payload": [
+              2,
+              -5,
+              11,
+              0,
+              -9,
+              3
+            ]
+          },
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "[2,11,3]"
+              }
+            ],
+            "structured_content": null
+          },
+          "error": null,
+          "status": "completed"
+        },
+        {
+          "id": "item_1",
+          "type": "mcp_tool_call",
+          "server": "casajev",
+          "tool": "sum_numbers",
+          "arguments": {
+            "payload": [
+              2,
+              11,
+              3
+            ]
+          },
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "16"
+              }
+            ],
+            "structured_content": null
+          },
+          "error": null,
+          "status": "completed"
+        }
+      ]
+    },
+    "date": "2026-09-20T12:48:27+00:00"
+  },
+  {
+    "case": "compose_b",
+    "agent": "terra_native",
+    "seconds": 18.112749207997695,
+    "success": true,
+    "result": 16,
+    "error": null,
+    "evidence": {
+      "backend": "codex exec",
+      "model": "gpt-5.6-terra",
+      "reasoning": "low",
+      "usage": [
+        {
+          "input_tokens": 72009,
+          "cached_input_tokens": 50432,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 207,
+          "reasoning_output_tokens": 27
+        }
+      ],
+      "exit_code": 0,
+      "seconds": 18.11103740800172,
+      "web_searches": [],
+      "tool_calls": [
+        {
+          "id": "item_1",
+          "type": "mcp_tool_call",
+          "server": "casajev",
+          "tool": "positive_numbers",
+          "arguments": {
+            "payload": [
+              2,
+              -5,
+              11,
+              0,
+              -9,
+              3
+            ]
+          },
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "[2,11,3]"
+              }
+            ],
+            "structured_content": null
+          },
+          "error": null,
+          "status": "completed"
+        },
+        {
+          "id": "item_2",
+          "type": "mcp_tool_call",
+          "server": "casajev",
+          "tool": "sum_numbers",
+          "arguments": {
+            "payload": [
+              2,
+              11,
+              3
+            ]
+          },
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "16"
+              }
+            ],
+            "structured_content": null
+          },
+          "error": null,
+          "status": "completed"
+        }
+      ]
+    },
+    "date": "2026-09-20T12:48:45+00:00"
+  }
+]

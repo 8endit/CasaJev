@@ -1,0 +1,6 @@
+{
+  "goal": "Summiere die ganzzahligen Cent-Beträge pro Kategorie. Gib ein JSON-Objekt zurück, dessen Schlüssel die unveränderten Kategorienamen und dessen Werte die Summen in Cent sind. Negative Beträge werden mitgerechnet. Keine Normalisierung der Namen.",
+  "objects": {"transactions": {"kind": "transactions", "description": "Synthetische Buchungen mit category und amount_cents", "value": [{"category":"Hardware","amount_cents":12000},{"category":"Software","amount_cents":2500},{"category":"Hardware","amount_cents":-2000},{"category":"hardware","amount_cents":300}]}},
+  "permissions": ["compute"],
+  "acceptance": {"expected": {"Hardware":10000,"Software":2500,"hardware":300}}
+}

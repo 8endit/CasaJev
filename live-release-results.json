@@ -1,0 +1,87 @@
+[
+  {
+    "case": "positive_sorted",
+    "status": "completed",
+    "result": [
+      2,
+      3,
+      12,
+      12
+    ],
+    "expected": [
+      2,
+      3,
+      12,
+      12
+    ],
+    "passed": true,
+    "seconds": 3.015,
+    "jev_calls": 3,
+    "gpt_preparation_calls": 0,
+    "builder_calls": 0,
+    "preparation": null,
+    "observed_tools": [
+      "positive",
+      "sort"
+    ],
+    "retried": false
+  },
+  {
+    "case": "transient_worker_failure",
+    "status": "completed",
+    "result": 18,
+    "expected": 18,
+    "passed": true,
+    "seconds": 2.896,
+    "jev_calls": 3,
+    "gpt_preparation_calls": 0,
+    "builder_calls": 0,
+    "preparation": null,
+    "observed_tools": [
+      "sum"
+    ],
+    "retried": true
+  },
+  {
+    "case": "prose_input",
+    "status": "completed",
+    "result": 15,
+    "expected": 15,
+    "passed": true,
+    "seconds": 18.333,
+    "jev_calls": 3,
+    "gpt_preparation_calls": 1,
+    "builder_calls": 0,
+    "preparation": {
+      "method": "numeric_source_multiset",
+      "count": 5,
+      "sources": [
+        {
+          "offset": 11,
+          "text": "minus sechs"
+        },
+        {
+          "offset": 24,
+          "text": "elf"
+        },
+        {
+          "offset": 29,
+          "text": "null"
+        },
+        {
+          "offset": 35,
+          "text": "vier"
+        },
+        {
+          "offset": 41,
+          "text": "minus zwei"
+        }
+      ]
+    },
+    "observed_tools": [
+      "positive",
+      "sum"
+    ],
+    "retried": false
+  }
+]

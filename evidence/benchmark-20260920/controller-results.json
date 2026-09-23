@@ -1,0 +1,524 @@
+[
+  {
+    "case": "sort_a",
+    "agent": "script",
+    "seconds": 0.1828587519703433,
+    "success": true,
+    "result": [
+      -8,
+      -3,
+      0,
+      2,
+      9,
+      17,
+      17
+    ],
+    "calls": 0
+  },
+  {
+    "case": "sort_a",
+    "agent": "jev",
+    "seconds": 1.690979094011709,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": [
+      -8,
+      -3,
+      0,
+      2,
+      9,
+      17,
+      17
+    ],
+    "calls": 2,
+    "steps": 1
+  },
+  {
+    "case": "sort_a",
+    "agent": "terra",
+    "seconds": 13.198344472097233,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": [
+      -8,
+      -3,
+      0,
+      2,
+      9,
+      17,
+      17
+    ],
+    "calls": 2,
+    "steps": 1
+  },
+  {
+    "case": "sort_a",
+    "agent": "sol",
+    "seconds": 11.015785712981597,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": [
+      -8,
+      -3,
+      0,
+      2,
+      9,
+      17,
+      17
+    ],
+    "calls": 2,
+    "steps": 1
+  },
+  {
+    "case": "sort_a",
+    "agent": "jev_no_graph",
+    "seconds": 1.7601590929552913,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": [
+      -8,
+      -3,
+      0,
+      2,
+      9,
+      17,
+      17
+    ],
+    "calls": 2,
+    "steps": 1
+  },
+  {
+    "case": "csv_a",
+    "agent": "script",
+    "seconds": 0.20530348701868206,
+    "success": true,
+    "result": {
+      "groups": [
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          5
+        ]
+      ],
+      "records": 5,
+      "extra_duplicates": 2
+    },
+    "calls": 0
+  },
+  {
+    "case": "csv_a",
+    "agent": "terra",
+    "seconds": 11.167823796044104,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": {
+      "groups": [
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          5
+        ]
+      ],
+      "records": 5,
+      "extra_duplicates": 2
+    },
+    "calls": 2,
+    "steps": 1
+  },
+  {
+    "case": "csv_a",
+    "agent": "sol",
+    "seconds": 11.312538741971366,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": {
+      "groups": [
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          5
+        ]
+      ],
+      "records": 5,
+      "extra_duplicates": 2
+    },
+    "calls": 2,
+    "steps": 1
+  },
+  {
+    "case": "csv_a",
+    "agent": "jev_no_graph",
+    "seconds": 1.7084380380110815,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": {
+      "groups": [
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          5
+        ]
+      ],
+      "records": 5,
+      "extra_duplicates": 2
+    },
+    "calls": 2,
+    "steps": 1
+  },
+  {
+    "case": "csv_a",
+    "agent": "jev",
+    "seconds": 1.68728843703866,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": {
+      "groups": [
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          5
+        ]
+      ],
+      "records": 5,
+      "extra_duplicates": 2
+    },
+    "calls": 2,
+    "steps": 1
+  },
+  {
+    "case": "compose_a",
+    "agent": "script",
+    "seconds": 0.18091198499314487,
+    "success": true,
+    "result": 26,
+    "calls": 0
+  },
+  {
+    "case": "compose_a",
+    "agent": "sol",
+    "seconds": 16.89973797800485,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": 26,
+    "calls": 3,
+    "steps": 2
+  },
+  {
+    "case": "compose_a",
+    "agent": "jev_no_graph",
+    "seconds": 2.7084182359976694,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": 26,
+    "calls": 3,
+    "steps": 2
+  },
+  {
+    "case": "compose_a",
+    "agent": "jev",
+    "seconds": 2.6054378979606554,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": 26,
+    "calls": 3,
+    "steps": 2
+  },
+  {
+    "case": "compose_a",
+    "agent": "terra",
+    "seconds": 19.799952073954046,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": 26,
+    "calls": 3,
+    "steps": 2
+  },
+  {
+    "case": "sort_b",
+    "agent": "script",
+    "seconds": 0.17625769006554037,
+    "success": true,
+    "result": [
+      -2,
+      -2,
+      0,
+      4.5,
+      4.5,
+      8,
+      100
+    ],
+    "calls": 0
+  },
+  {
+    "case": "sort_b",
+    "agent": "jev_no_graph",
+    "seconds": 1.633149489061907,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": [
+      -2,
+      -2,
+      0,
+      4.5,
+      4.5,
+      8,
+      100
+    ],
+    "calls": 2,
+    "steps": 1
+  },
+  {
+    "case": "sort_b",
+    "agent": "jev",
+    "seconds": 1.7356325730215758,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": [
+      -2,
+      -2,
+      0,
+      4.5,
+      4.5,
+      8,
+      100
+    ],
+    "calls": 2,
+    "steps": 1
+  },
+  {
+    "case": "sort_b",
+    "agent": "terra",
+    "seconds": 13.068806048948318,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": [
+      -2,
+      -2,
+      0,
+      4.5,
+      4.5,
+      8,
+      100
+    ],
+    "calls": 2,
+    "steps": 1
+  },
+  {
+    "case": "sort_b",
+    "agent": "sol",
+    "seconds": 10.729259014013223,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": [
+      -2,
+      -2,
+      0,
+      4.5,
+      4.5,
+      8,
+      100
+    ],
+    "calls": 2,
+    "steps": 1
+  },
+  {
+    "case": "csv_b",
+    "agent": "script",
+    "seconds": 0.17305021593347192,
+    "success": true,
+    "result": {
+      "groups": [
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "records": 5,
+      "extra_duplicates": 2
+    },
+    "calls": 0
+  },
+  {
+    "case": "csv_b",
+    "agent": "jev",
+    "seconds": 1.8589531010948122,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": {
+      "groups": [
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "records": 5,
+      "extra_duplicates": 2
+    },
+    "calls": 2,
+    "steps": 1
+  },
+  {
+    "case": "csv_b",
+    "agent": "terra",
+    "seconds": 11.57110666600056,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": {
+      "groups": [
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "records": 5,
+      "extra_duplicates": 2
+    },
+    "calls": 2,
+    "steps": 1
+  },
+  {
+    "case": "csv_b",
+    "agent": "sol",
+    "seconds": 12.927218902972527,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": {
+      "groups": [
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "records": 5,
+      "extra_duplicates": 2
+    },
+    "calls": 2,
+    "steps": 1
+  },
+  {
+    "case": "csv_b",
+    "agent": "jev_no_graph",
+    "seconds": 1.7785737509839237,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": {
+      "groups": [
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "records": 5,
+      "extra_duplicates": 2
+    },
+    "calls": 2,
+    "steps": 1
+  },
+  {
+    "case": "compose_b",
+    "agent": "script",
+    "seconds": 0.1684232580009848,
+    "success": true,
+    "result": 16,
+    "calls": 0
+  },
+  {
+    "case": "compose_b",
+    "agent": "terra",
+    "seconds": 17.61914850596804,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": 16,
+    "calls": 3,
+    "steps": 2
+  },
+  {
+    "case": "compose_b",
+    "agent": "sol",
+    "seconds": 17.20840440399479,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": 16,
+    "calls": 3,
+    "steps": 2
+  },
+  {
+    "case": "compose_b",
+    "agent": "jev_no_graph",
+    "seconds": 2.6625109389424324,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": 16,
+    "calls": 3,
+    "steps": 2
+  },
+  {
+    "case": "compose_b",
+    "agent": "jev",
+    "seconds": 2.6739516799570993,
+    "success": true,
+    "status": "completed",
+    "message": null,
+    "result": 16,
+    "calls": 3,
+    "steps": 2
+  }
+]

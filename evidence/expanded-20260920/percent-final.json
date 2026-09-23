@@ -1,0 +1,26 @@
+[
+  {
+    "input": "Berechne 19 Prozent von 249. Gib das numerische Ergebnis zurück.",
+    "response": {
+      "elapsed_seconds": 25.166,
+      "result": 47.31,
+      "role": "assistant",
+      "status": "done",
+      "task_id": "86b6200083a04482",
+      "text": "Fertig."
+    },
+    "conversation": "smoke-percent-fixed-da52576c"
+  },
+  {
+    "input": "Und jetzt 7 Prozent von 320.",
+    "response": {
+      "elapsed_seconds": 10.763,
+      "result": 22.4,
+      "role": "assistant",
+      "status": "done",
+      "task_id": "6d4a45b51e664571",
+      "text": "Fertig."
+    },
+    "conversation": "smoke-percent-fixed-da52576c"
+  }
+]

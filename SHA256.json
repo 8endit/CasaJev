@@ -1,0 +1,14 @@
+{
+  "release": "casajev-0.5.1",
+  "artifacts": {
+    "dist/casajev-0.5.1-py3-none-any.whl": "f5ca646a0aaa17f0c38df6b590412d212a20ba3e41ceaacff855e03b30ab604e",
+    "dist/casajev-0.5.1.tar.gz": "d7eeedff7e63c00bd209ec0be3ac865e19bd83a0cc1e7fe7ae1ee81909a020b2",
+    "casajev/action.py": "02bbc85ed38dda8f6debf84aa665b3d26d1dff47343692406905f8925274206a",
+    "desktop/package-lock.json": "db9ecf046a832720551b2114c9fec7ab02c2262b31b5a9c43c66c8fdc0df1971",
+    "casajev/laya.py": "2d0a38904e5c933d11ecbec049c07261286e813b22eb1e3195496bb7034106ef",
+    "casajev/realtime.py": "ddb42e687caccbf70e01df85c77dae1a759f94677398d7bc1028cadea6f164de",
+    "casajev/runner.py": "f4c683a8a2e483e2284e325a593095ed7649cd3b5e7ee091357c8b8dda5d11db",
+    "LICENSE": "49fc9b475e8180a9607f08e31194207b798f341d62beef20e465abe8cf4df431",
+    "THIRD_PARTY_NOTICES.md": "f914cb5880fb25417b9d3ecdd97ebe68a991120909f499bc58b7da0c2097dcca"
+  }
+}

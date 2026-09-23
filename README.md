@@ -8,6 +8,11 @@ Jev entscheidet im allgemeinen Harness, was als Nächstes hilft. Fehlt eine Fäh
 Werkzeugvertrag aus, baut und prüft eine Implementierung, registriert sie und setzt
 denselben Auftrag fort. Ein späterer Auftrag kann das Werkzeug direkt verwenden.
 
+**Projektstatus:** Experimenteller lokaler Prototyp unter Apache-2.0. Die bisherigen
+Geschwindigkeitswerte stammen aus kleinen synthetischen Tests und belegen keinen
+allgemeinen Vorteil gegenüber GPT. Beiträge und reproduzierbare Gegenbeispiele sind
+willkommen; siehe [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Start
 
 ### Desktop auf macOS
@@ -33,6 +38,12 @@ Auf macOS `CasaJev starten.command` doppelklicken. Unter Linux im Projektordner
 `./start-casajev.sh` ausführen. Unter Windows `Start-CasaJev.ps1` mit PowerShell
 ausführen. Danach öffnet sich **http://127.0.0.1:8787**.
 
+Für die native Desktop-Oberfläche unter Windows `Start-CasaJev-Desktop.ps1` mit
+PowerShell ausführen. Docker Desktop muss zuvor laufen. Der Starter richtet die
+Python- und Desktop-Abhängigkeiten ein und öffnet das Electron-Fenster.
+Der Web-Starter speichert Chats und Zugangsdaten standardmäßig im privaten
+Windows-Benutzerordner unter `%LOCALAPPDATA%\CasaJev\state`.
+
 Beim ersten Start fragt CasaJev getrennt nach dem Provider für allgemeine Aufgaben und
 für die Echtzeit-Pipeline. Die evidenzbasierte Voreinstellung ist **Jev allgemein** und
 **Laya für vorher geprüfte kleine Echtzeit-Aktionsräume**. Die Auswahl ist später unter
@@ -43,9 +54,8 @@ Docker Engine. Der Worker läuft dort ohne Netzwerk, read-only, ohne Linux-Capab
 und mit CPU-, Speicher-, Prozess- und Ausgabelimits. CasaJev führt bei fehlender Sandbox
 keinen unsicheren Fallback aus. Der native macOS-Pfad verwendet weiterhin Seatbelt.
 
-Auf diesem Mac ist der lokale Zugang eingerichtet; der bestehende Schlüssel wird aus seiner bisherigen
-lokalen Datei gelesen. Er steckt weder im Quellcode noch im ZIP. Codex verwendet die
-bestehende CLI-Anmeldung. Falls die Anwendung bereits läuft, genügt die Browseradresse.
+Der TypeSafe-Schlüssel wird lokal eingerichtet und nicht im Quellcode gespeichert.
+Codex verwendet eine vorhandene CLI-Anmeldung. Falls die Anwendung bereits läuft, genügt die Browseradresse.
 Zum Beenden im Server-Terminal Strg+C drücken. Es ist kein Autostartdienst eingerichtet.
 
 Die vier Standardwerkzeuge werden beim Live-Start geprüft und bereitgestellt. Der
@@ -162,10 +172,9 @@ uv run casajev serve
 ```
 
 Die Python-Pakete und die Oberfläche sind plattformneutral. Version 0.5.1 wurde auf
-macOS vollständig ausgeführt. Windows- und Linux-Startpfad, Metadaten und Docker-Befehl
-sind statisch bzw. auf dem macOS-Docker-CLI-Pfad prüfbar, aber in dieser Veröffentlichung
-noch nicht auf realen Windows-/Linux-Hosts end-to-end gemessen. Diese Grenze ist bewusst
-Teil des Release-Status, keine behauptete Gleichwertigkeit.
+macOS vollständig ausgeführt. Unter Windows liefen gezielte Browser- und Desktop-Tests;
+ein vollständiger Ende-zu-Ende-Test steht noch aus, weil die Docker Engine auf dem
+Test-PC nicht lief. Linux wurde noch nicht auf einem realen Host Ende-zu-Ende geprüft.
 
 Für den allgemeinen Standardpfad wird ein TypeSafe-Schlüssel benötigt. Der lokale
 Laya-Pfad ist für eine konkret evaluierte Anwendung ausdrücklich wählbar:

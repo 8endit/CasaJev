@@ -14,8 +14,8 @@ $WorkerImage = if ($env:CASAJEV_WORKER_IMAGE) { $env:CASAJEV_WORKER_IMAGE } else
 & docker image inspect $WorkerImage *> $null
 if ($LASTEXITCODE -ne 0) { & docker pull $WorkerImage }
 Set-Location $ProjectDir
-$DataDir = if ($env:CASAJEV_HOME) { $env:CASAJEV_HOME } else { Join-Path $ProjectDir '.casajev' }
-& uv sync --project $ProjectDir --extra local
+$DataDir = if ($env:CASAJEV_HOME) { $env:CASAJEV_HOME } else { Join-Path $env:LOCALAPPDATA 'CasaJev\state' }
+& uv sync --project $ProjectDir --python 3.11 --extra local
 & uv run --project $ProjectDir playwright install chromium
 Start-Job -ScriptBlock { Start-Sleep -Seconds 2; Start-Process 'http://127.0.0.1:8787' } | Out-Null
 & uv run --project $ProjectDir casajev --home $DataDir serve

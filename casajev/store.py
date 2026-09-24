@@ -63,6 +63,7 @@ class Store:
     def create(self, body):
         task_id = uuid.uuid4().hex[:16]
         state = {'id': task_id, 'goal': body['goal'], 'objects': body.get('objects', {}),
+                 'original_objects_hash': digest(body.get('objects', {})),
                  'permissions': body.get('permissions', ['compute']), 'acceptance': body.get('acceptance'),
                  'status': 'queued', 'phase': 'decide', 'steps': 0, 'builds': 0, 'jev_calls': 0,
                  'builder_calls': 0, 'elapsed_seconds': 0, 'observations': [], 'seen_calls': [],

@@ -127,7 +127,7 @@ class Application:
             if path == '/api/resume':
                 with h.store.lock():
                     state = h.store.get(body['id'])
-                    if state['status'] in ('running', 'queued', 'completed', 'budget_exhausted'):
+                    if state['status'] in ('running', 'queued', 'completed', 'completed_unverified', 'budget_exhausted'):
                         raise ValueError('Task cannot be resumed in its current state')
                     if not isinstance(body.get('clarification'), str) or not body['clarification'].strip():
                         raise ValueError('Clarification is required')

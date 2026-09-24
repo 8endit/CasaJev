@@ -39,12 +39,16 @@ except (ValueError,OSError):
  pass
 packet=json.load(sys.stdin)
 namespace={"__name__":"casajev_tool"}
+class InputRejected(ValueError):
+ pass
+namespace["InputRejected"]=InputRejected
 exec(compile(packet["source"],"<tool>","exec"),namespace)
 try:
  result=namespace["main"](packet["input"])
  print(json.dumps({"ok":True,"result":result},allow_nan=False))
 except Exception as exc:
- print(json.dumps({"ok":False,"error":type(exc).__name__+": "+str(exc)[:500]}))
+ print(json.dumps({"ok":False,"error":type(exc).__name__+": "+str(exc)[:500],
+                   "kind":"domain_rejection" if isinstance(exc,InputRejected) else "tool_error"}))
 '''
 
 ACTIVE_PROCESSES = set()
@@ -53,6 +57,18 @@ PROCESS_LOCK = threading.Lock()
 
 class TransientWorkerError(RuntimeError):
     """Temporary infrastructure failure, distinct from defective tool code."""
+
+
+class ToolRejectedInput(ValueError):
+    """The tool explicitly rejected this input as invalid data."""
+
+
+class ToolExecutionError(RuntimeError):
+    """The worker ran, but the tool crashed or returned an invalid protocol result."""
+
+
+class ToolCodeError(ToolExecutionError):
+    """The registered source failed inside a responsive worker."""
 
 
 def terminate_workers():
@@ -189,13 +205,16 @@ class Runner:
         code, stdout, stderr = bounded_process(command, packet, self.timeout, env=env, cancel_event=self.cancel_event)
         if code:
             detail = stderr.decode(errors='replace')[:300].strip()
-            raise RuntimeError(f'Isolated tool exited with code {code}' + (f': {detail}' if detail else ''))
+            raise ToolExecutionError(f'Isolated tool exited with code {code}' + (f': {detail}' if detail else ''))
         try:
             response = json.loads(stdout)
         except ValueError:
-            raise ValueError('Tool did not return exactly one JSON result') from None
+            raise ToolCodeError('Tool did not return exactly one JSON result') from None
         if not response.get('ok'):
-            raise ValueError(response.get('error', 'Tool error'))
+            error = response.get('error', 'Tool error')
+            if response.get('kind') == 'domain_rejection':
+                raise ToolRejectedInput(error)
+            raise ToolCodeError(error)
         return response['result']
 
     def verify(self, spec, source):

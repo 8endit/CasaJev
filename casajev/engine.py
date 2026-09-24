@@ -1,12 +1,13 @@
 import copy
 import csv
 import io
+import itertools
 import threading
 import time
 from .contracts import canonical, contract, contract_id, digest, validate, validate_task
 from .jev import choice
 from .templates import TEMPLATES, SOURCES
-from .runner import TransientWorkerError
+from .runner import TransientWorkerError, ToolRejectedInput, ToolExecutionError, ToolCodeError
 from .vendor.retry import jittered_backoff
 from .controller import DecisionController, JevDecisionPolicy
 
@@ -25,8 +26,45 @@ def validate_csv_shape(payload):
         rows = list(csv.reader(io.StringIO(payload), strict=True))
     except csv.Error as exc:
         raise ValueError('Malformed CSV: ' + str(exc)) from exc
-    if rows and any(len(row) != len(rows[0]) for row in rows[1:]):
+    if any(len(row) != len(rows[0]) for row in rows[1:]):
         raise ValueError('Inconsistent CSV width')
+    return rows[0] if rows else []
+
+
+def bound_inputs(obj, spec):
+    """Enumerate schema-valid, auditable CSV/header bindings without solving the task."""
+    value, schema = obj['value'], spec['input_schema']
+    try:
+        validate(value, schema)
+        return [(value, {})]
+    except Exception:
+        pass
+    if not isinstance(schema, dict):
+        return []
+    props = schema.get('properties', {})
+    columns = props.get('columns', {})
+    roles = columns.get('required', []) if isinstance(columns, dict) else []
+    if not (obj['kind'] == 'csv' and isinstance(value, str) and
+            schema.get('type') == 'object' and {'csv', 'columns'} <= set(schema.get('required', [])) and
+            isinstance(props.get('csv'), dict) and props['csv'].get('type') == 'string' and
+            isinstance(roles, list) and 1 <= len(roles) <= 3 and
+            all(isinstance(role, str) for role in roles)):
+        return []
+    headers = validate_csv_shape(value)
+    if not headers or any(not cell for cell in headers) or len(set(cell.casefold() for cell in headers)) != len(headers):
+        raise ValueError('Missing, empty or ambiguous CSV header for column mapping')
+    if len(headers) > 6 or len(headers) < len(roles):
+        return []
+    result = []
+    for selected in itertools.permutations(headers, len(roles)):
+        mapping = dict(zip(roles, selected))
+        payload = {'csv': value, 'columns': mapping}
+        try:
+            validate(payload, schema)
+        except Exception:
+            continue
+        result.append((payload, mapping))
+    return result
 
 
 class Harness:
@@ -156,7 +194,7 @@ class Harness:
     def run(self, task_id):
         with self.store.lock():
             state = self.store.get(task_id)
-            if state['status'] in ('completed', 'cancelled'):
+            if state['status'] in ('completed', 'completed_unverified', 'cancelled'):
                 return state
             state.update(status='running', mode=self.policy_mode())
             state.pop('message', None)
@@ -191,13 +229,19 @@ class Harness:
             except KeyboardInterrupt:
                 self.pause(state, 'Interrupted. Resume continues from the saved phase.', 'paused')
             except BudgetExceeded as exc:
+                state['outcome_kind'] = 'timeout' if 'time' in str(exc).lower() else 'runtime_error'
                 self.pause(state, str(exc), 'budget_exhausted')
             except InterruptedError as exc:
                 self.pause(state, str(exc), 'paused')
             except StaleState as exc:
                 state = self.store.get(task_id)
+                state['outcome_kind'] = 'runtime_error'
+                self.pause(state, str(exc), 'failed')
+            except TimeoutError as exc:
+                state['outcome_kind'] = 'timeout'
                 self.pause(state, str(exc), 'failed')
             except Exception as exc:
+                state['outcome_kind'] = 'runtime_error'
                 self.pause(state, str(exc)[:3000], 'paused' if self.cancel_event.is_set() else 'failed')
             finally:
                 state['elapsed_seconds'] = previous_elapsed + time.monotonic() - start
@@ -206,7 +250,7 @@ class Harness:
 
     def decide(self, state):
         tools = self.store.tools()
-        candidates, bindings, external_bindings = {}, {}, {}
+        candidates, bindings, external_bindings, binding_errors = {}, {}, {}, []
         for tool_id, tool in tools.items():
             spec = tool['spec']
             if not set(spec['permissions']).issubset(state['permissions']):
@@ -215,16 +259,19 @@ class Harness:
                 if obj['kind'] != spec['input_kind']:
                     continue
                 try:
-                    validate(obj['value'], spec['input_schema'])
-                except Exception:
+                    possible = bound_inputs(obj, spec)
+                except ValueError as exc:
+                    binding_errors.append((ref, str(exc)))
                     continue
-                call_hash = digest([tool_id, obj['value']])
-                if call_hash in state['seen_calls']:
-                    continue
-                key = 'use:' + str(len(bindings))
-                bindings[key] = (tool_id, ref, call_hash)
-                candidates[key] = {'tool': tool_id, 'input_ref': ref, 'description': spec['description'],
-                                   'semantics': spec['semantics'], 'risk': 'compute'}
+                for payload, mapping in possible:
+                    call_hash = digest([tool_id, payload])
+                    if call_hash in state['seen_calls']:
+                        continue
+                    key = 'use:' + str(len(bindings))
+                    bindings[key] = (tool_id, ref, call_hash, payload, mapping)
+                    candidates[key] = {'tool': tool_id, 'input_ref': ref, 'description': spec['description'],
+                                       'semantics': spec['semantics'], 'input_binding': mapping,
+                                       'risk': 'compute'}
         if self.connectors and 'external_read' in state['permissions']:
             for identity, entry in self.connectors.tools().items():
                 for ref, obj in state['objects'].items():
@@ -237,6 +284,15 @@ class Harness:
                     candidates[key] = {'tool':identity,'input_ref':ref,'description':entry['description'],
                                        'semantics':'Explicitly enabled external read; results are untrusted source data.',
                                        'risk':'read'}
+        if not bindings and not external_bindings and not state['observations']:
+            malformed = next(((ref, error) for ref, error in binding_errors
+                              if error.startswith(('Malformed CSV:', 'Inconsistent CSV width'))), None)
+            if malformed:
+                ref, error = malformed
+                state['outcome_kind'] = 'domain_rejection'
+                self.store.event(state['id'], 'invalid_input', {'input_ref':ref,'error':error})
+                self.pause(state, error, 'invalid_input')
+                return
         if len(candidates) > 180:
             self.pause(state, 'Too many applicable tools; narrow the task or retire old tools.')
             return
@@ -260,8 +316,8 @@ class Harness:
         if action is None:
             self.pause(state, 'Jev is unsure about the next step. Clarify the goal or add data.')
         elif action.startswith('use:'):
-            tool_id, ref, call_hash = bindings[action]
-            self.execute_tool(state, tool_id, ref, call_hash, tools[tool_id])
+            tool_id, ref, call_hash, payload, mapping = bindings[action]
+            self.execute_tool(state, tool_id, ref, call_hash, tools[tool_id], payload, mapping)
         elif action.startswith('external:'):
             identity, ref, call_hash, schema_hash = external_bindings[action]
             self.store.save(state, 'connector_started', {'tool':identity,'input_ref':ref,'schema_hash':schema_hash})
@@ -275,6 +331,7 @@ class Harness:
             state['seen_calls'].append(call_hash)
             state['observations'].append({'tool':identity,'input_ref':ref,'output_ref':ref_out,'result':result,
                 'validated':False,'validation':'MCP success and input schema; no independent factual oracle',
+                'input_hash':digest(state['objects'][ref]['value']),'output_hash':digest(result),
                 'seconds':time.monotonic()-started})
             self.store.save(state,'connector_completed',state['observations'][-1])
         elif action == 'need_capability':
@@ -294,15 +351,27 @@ class Harness:
                 if set(acceptance) != {'expected'}:
                     raise ValueError('Acceptance format must be {expected: JSON value}')
                 if canonical(state['result']) != canonical(acceptance['expected']):
-                    self.pause(state, 'Independent expected result does not match the actual result.', 'needs_review')
+                    state['outcome_kind'] = 'incorrect_result'
+                    self.pause(state, 'Task-supplied expected result does not match the actual result.', 'needs_review')
                     return
-                state['verification'] = 'independent_expected_result'
+                state['verification'] = 'task_supplied_expected_result_match'
+                state['outcome_kind'] = 'value'
+                state['status'] = 'completed'
             else:
-                state['verification'] = ('external_source_and_jev_completion; no independent factual oracle'
-                    if any(str(o['tool']).startswith('mcp:') for o in state['observations'])
-                    else 'contract_tests_and_jev_completion; no independent goal oracle')
-            state['status'] = 'completed'
-            self.store.save(state, 'task_completed', {'result': state['result'], 'verification': state['verification']})
+                state['verification'] = 'no_goal_oracle'
+                state['outcome_kind'] = 'unverified'
+                state['status'] = 'completed_unverified'
+            state['verification_evidence'] = {
+                'goal_hash': digest(state['goal']),
+                'original_objects_hash': state.get('original_objects_hash', digest(state.get('original_objects', state['objects']))),
+                'result_hash': digest(state['result']),
+                'expected_hash': digest(acceptance['expected']) if acceptance is not None else None,
+                'oracle_source': 'task_supplied' if acceptance is not None else None,
+                'observations': [{key: o.get(key) for key in ('tool','input_ref','input_hash','output_hash',
+                                  'source_hash','contract_hash','input_binding')} for o in state['observations']]}
+            self.store.save(state, 'task_completed' if state['status']=='completed' else 'task_output_unverified',
+                            {'result': state['result'], 'verification': state['verification'],
+                             'verification_evidence':state['verification_evidence']})
             if self.use_graph:
                 from .workflows import export
                 try:
@@ -317,7 +386,10 @@ class Harness:
         else:
             raise ValueError('Unrecognized action')
 
-    def execute_tool(self, state, tool_id, ref, call_hash, entry):
+    def execute_tool(self, state, tool_id, ref, call_hash, entry, payload=None, mapping=None):
+        if payload is None:
+            payload = state['objects'][ref]['value']
+        mapping = mapping or {}
         if digest(entry['source']) != entry['source_hash']:
             self.store.revoke(tool_id)
             raise ValueError('Tool integrity mismatch; revoked')
@@ -326,6 +398,7 @@ class Harness:
                 validate_csv_shape(state['objects'][ref]['value'])
             except ValueError as exc:
                 self.store.event(state['id'], 'invalid_input', {'input_ref': ref, 'error': str(exc)})
+                state['outcome_kind'] = 'domain_rejection'
                 self.pause(state, str(exc), 'invalid_input')
                 return
         attempts = state.setdefault('tool_attempts', {})
@@ -333,24 +406,57 @@ class Harness:
             self.pause(state, 'Wiederholungslimit für diesen Werkzeugaufruf erreicht.', 'failed')
             return
         attempts[call_hash] = attempts.get(call_hash, 0) + 1
-        self.store.save(state, 'tool_started', {'tool': tool_id, 'input_ref': ref, 'attempt': attempts[call_hash]})
+        self.store.save(state, 'tool_started', {'tool': tool_id, 'input_ref': ref,
+            'input_hash': digest(payload), 'input_binding': mapping, 'source_hash': entry['source_hash'],
+            'contract_hash': contract_id(entry['spec']), 'attempt': attempts[call_hash]})
         started = time.monotonic()
         try:
-            result = self.runner.run(entry['source'], state['objects'][ref]['value'])
+            result = self.runner.run(entry['source'], payload)
             validate(result, entry['spec']['output_schema'])
         except InterruptedError:
             raise
         except TransientWorkerError as exc:
             state['pending_retry'] = {'tool': tool_id, 'input_ref': ref, 'call_hash': call_hash,
-                                      'source_hash': entry['source_hash'], 'error': str(exc)[:500]}
+                                      'source_hash': entry['source_hash'], 'input_value': payload,
+                                      'input_binding': mapping, 'original_input_hash':digest(state['objects'][ref]['value']),
+                                      'error': str(exc)[:500]}
             self.store.save(state, 'tool_transient_failure', state['pending_retry'])
             if attempts[call_hash] >= self.max_tool_retries + 1:
+                state['outcome_kind'] = 'runtime_error'
                 self.pause(state, 'Die Ausführungsumgebung ist weiterhin nicht erreichbar. Das Werkzeug bleibt registriert.', 'failed')
             else:
                 state['phase'] = 'retry'
                 self.store.save(state)
             return
+        except ToolRejectedInput as exc:
+            state['outcome_kind'] = 'domain_rejection'
+            state['rejection_verified'] = False
+            self.store.event(state['id'], 'tool_rejected_input', {'tool':tool_id,'error':str(exc)[:500],
+                'rejection_verified':False})
+            self.pause(state, str(exc)[:500], 'invalid_input')
+            return
+        except TimeoutError as exc:
+            state['outcome_kind'] = 'timeout'
+            self.store.event(state['id'], 'tool_timeout', {'tool':tool_id,'error':str(exc)[:500]})
+            self.pause(state, str(exc)[:500], 'failed')
+            return
+        except ToolCodeError as exc:
+            state['outcome_kind'] = 'contract_failure'
+            self.store.revoke(tool_id)
+            self.store.event(state['id'], 'tool_code_failed', {'tool':tool_id,'error':str(exc)[:500]})
+            if state.get('execution_mode',self.execution_mode)=='standard':
+                state.update(phase='build', pending_spec=entry['spec'], repair_error=str(exc)[:2500])
+                self.store.save(state)
+            else:
+                self.pause(state, str(exc)[:500], 'failed')
+            return
+        except ToolExecutionError as exc:
+            state['outcome_kind'] = 'runtime_error'
+            self.store.event(state['id'], 'tool_runtime_failed', {'tool':tool_id,'error':str(exc)[:500]})
+            self.pause(state, str(exc)[:500], 'failed')
+            return
         except Exception as exc:
+            state['outcome_kind'] = 'contract_failure'
             self.store.revoke(tool_id)
             if state.get('execution_mode',self.execution_mode)!='standard':
                 self.store.event(state['id'],'tool_failed',{'tool':tool_id,'error':str(exc)[:2500]})
@@ -367,7 +473,10 @@ class Harness:
         state.pop('pending_retry', None)
         state['seen_calls'].append(call_hash)
         state['observations'].append({'tool': tool_id, 'input_ref': ref, 'output_ref': ref_out,
-                                      'result': result, 'validated': True, 'seconds': time.monotonic() - started})
+                                      'result': result, 'validated': True, 'input_hash': digest(payload),
+                                      'output_hash': digest(result), 'input_binding': mapping,
+                                      'source_hash': entry['source_hash'], 'contract_hash': contract_id(entry['spec']),
+                                      'seconds': time.monotonic() - started})
         self.store.save(state, 'tool_completed', state['observations'][-1])
 
     def retry(self, state):
@@ -376,8 +485,11 @@ class Harness:
         if entry is None or entry['source_hash'] != pending['source_hash']:
             self.pause(state, 'Werkzeug wurde seit dem Fehler verändert oder deaktiviert.', 'needs_review')
             return
-        if digest([pending['tool'], state['objects'][pending['input_ref']]['value']]) != pending['call_hash']:
+        if digest([pending['tool'], pending.get('input_value', state['objects'][pending['input_ref']]['value'])]) != pending['call_hash']:
             self.pause(state, 'Eingabe wurde seit dem Fehler verändert.', 'needs_review')
+            return
+        if digest(state['objects'][pending['input_ref']]['value']) != pending.get('original_input_hash', digest(state['objects'][pending['input_ref']]['value'])):
+            self.pause(state, 'Originaleingabe wurde seit dem Fehler verändert.', 'needs_review')
             return
         decision = self.ask(state, {**self.context(state), 'temporary_failure': pending}, {'action': choice(
             'A pure-data tool encountered an explicitly temporary infrastructure failure. Choose a bounded retry of the exact same input, or ask for help.',
@@ -387,7 +499,8 @@ class Harness:
             return
         wait = min(1.0, jittered_backoff(state['tool_attempts'][pending['call_hash']], base_delay=.15, max_delay=.7))
         if self.cancel_event.wait(wait): raise InterruptedError('Auftrag angehalten.')
-        self.execute_tool(state, pending['tool'], pending['input_ref'], pending['call_hash'], entry)
+        self.execute_tool(state, pending['tool'], pending['input_ref'], pending['call_hash'], entry,
+                          pending.get('input_value'), pending.get('input_binding'))
 
     def specify(self, state):
         if state.get('proposals') is None:
@@ -444,7 +557,13 @@ class Harness:
             evidence = self.runner.verify(state['pending_spec'], state['pending_source'])
         except InterruptedError:
             raise
+        except (TimeoutError, TransientWorkerError, OSError, ToolExecutionError) as exc:
+            state['outcome_kind'] = 'verifier_error'
+            self.pause(state, 'Verifier unavailable: ' + str(exc)[:500], 'failed')
+            self.store.save(state, 'verifier_error', {'error':str(exc)[:500]})
+            return
         except Exception as exc:
+            state['outcome_kind'] = 'contract_failure'
             state.update(phase='build', repair_error=str(exc)[:3000])
             state.pop('pending_source', None)
             self.store.save(state, 'verification_failed', {'error': state['repair_error']})

@@ -80,7 +80,7 @@ def test_local_server_guards_and_roundtrip(tmp_path):
             if task_state['status'] not in ('queued','running'):
                 break
             time.sleep(.1)
-        assert task_state['status']=='completed'
+        assert task_state['status']=='completed_unverified'
         assert task_state['result']=={'groups':[[1,2]],'records':2,'extra_duplicates':1}
     finally:
         proc.send_signal(signal.SIGINT)

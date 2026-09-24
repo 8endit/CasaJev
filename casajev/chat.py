@@ -365,10 +365,11 @@ class Chat:
                 response['action_trace']=result['trace']
                 response['execution']={'mode':'browser_action','gpt_calls':gpt_calls,'jev_calls':jev_calls,
                     'tool_calls':sum(len(item['commands']) for item in result['trace']),
-                    'verification':'structured_observation_after_each_batch_with_visual_fallback'}
+                    'verification':result.get('verification','no_independent_goal_oracle')}
                 response['text']=result['text']
-                if result['status']=='completed':
+                if result['status'] in ('completed','completed_unverified'):
                     convo.pop('pending_action',None)
+                    response['status']='unverified' if result['status']=='completed_unverified' else 'done'
                 else:
                     convo['pending_action']={'goal':goal,'url':result['url']}
                     response['needs_input']=True
@@ -425,6 +426,13 @@ class Chat:
             response.update(result=result['result'], text='Fertig.', status='done')
             convo['objects']={**response.get('objects',convo.get('objects',{})), 'previous_result':{
                 'kind':kind_of(result['result']), 'description':'Ergebnis des letzten Auftrags', 'value':result['result']}}
+        elif result['status'] == 'completed_unverified':
+            response.update(result=result['result'],
+                            text='Ergebnis berechnet. Eine unabhängige Prüfung des Nutzerziels fehlt.',
+                            status='unverified')
+            convo['objects']={**response.get('objects',convo.get('objects',{})), 'previous_result':{
+                'kind':kind_of(result['result']), 'description':'Ungeprüftes Ergebnis des letzten Auftrags',
+                'value':result['result']}}
         else:
             response.update(result=None, text=self.explain_status(result), needs_input=True,
                             status='paused' if result['status']=='paused' else 'error' if result['status']=='failed' else 'done')

@@ -63,3 +63,63 @@ POSITIVE = {
     'examples':[{'input':[-1,0,3,2,3],'output':[3,2,3]},{'input':[-2,0],'output':[]},{'input':[],'output':[]}]}
 TEMPLATES.append(POSITIVE)
 SOURCES[contract_id(POSITIVE)]='def main(payload):\n    return [x for x in payload if x > 0]\n'
+
+# A parameterized data contract. The controller, not the tool or evaluation
+# adapter, binds the three role names to observed CSV headers for each call.
+CSV_COLUMNS_SOURCE = '''import csv
+import io
+import datetime
+
+def main(payload):
+    rows = list(csv.reader(io.StringIO(payload["csv"]), strict=True))
+    if not rows or not rows[0] or any(not cell for cell in rows[0]):
+        raise InputRejected("Missing or empty CSV header")
+    headers = rows[0]
+    if len(set(cell.casefold() for cell in headers)) != len(headers):
+        raise InputRejected("Duplicate or ambiguous CSV header")
+    columns = payload["columns"]
+    names = [columns[role] for role in ("vendor", "amount", "date")]
+    if len(set(names)) != 3 or any(name not in headers for name in names):
+        raise InputRejected("Missing or ambiguous column mapping")
+    indexes = [headers.index(name) for name in names]
+    output = []
+    for row in rows[1:]:
+        if len(row) != len(headers):
+            raise InputRejected("Inconsistent CSV width")
+        vendor, amount, date = [row[index] for index in indexes]
+        try:
+            if datetime.date.fromisoformat(date).isoformat() != date:
+                raise InputRejected("Non-canonical ISO date")
+        except ValueError:
+            raise InputRejected("Invalid ISO date")
+        output.append({"vendor": vendor, "amount": amount if amount != "" else None, "date": date})
+    return {"rows": output}
+'''
+CSV_COLUMNS = {
+    'name': 'csv_columns_to_records',
+    'description': 'Read vendor, amount and date from explicitly mapped CSV headers; preserve cell text and map empty amount to null.',
+    'operation': 'extract', 'input_kind': 'csv', 'output_kind': 'records',
+    'semantics': 'Input is an unchanged CSV string plus an explicit one-to-one header mapping for vendor, amount, date. Reject missing, duplicate or case-ambiguous headers, inconsistent rows and non-canonical or invalid ISO dates. Output rows retain vendor, nonempty amount and date text exactly; empty amount becomes null. Column names may vary; the mapping is a call parameter, never a change to this contract.',
+    'permissions': ['compute'],
+    'input_schema': {'type':'object','properties': {
+        'csv': {'type':'string','maxLength':200000},
+        'columns': {'type':'object','properties': {
+            'vendor': {'type':'string','minLength':1}, 'amount': {'type':'string','minLength':1},
+            'date': {'type':'string','minLength':1}},
+            'required':['vendor','amount','date'],'additionalProperties':False}},
+        'required':['csv','columns'],'additionalProperties':False},
+    'output_schema': {'type':'object','properties': {'rows': {'type':'array','items': {
+        'type':'object','properties': {'vendor': {'type':'string'},
+            'amount': {'type':['string','null']}, 'date': {'type':'string'}},
+        'required':['vendor','amount','date'],'additionalProperties':False}}},
+        'required':['rows'],'additionalProperties':False},
+    'examples': [
+        {'input': {'csv':'Supplier,Net,Day\n Acme ,0012.50,2026-09-24\n',
+                   'columns':{'vendor':'Supplier','amount':'Net','date':'Day'}},
+         'output': {'rows':[{'vendor':' Acme ','amount':'0012.50','date':'2026-09-24'}]}},
+        {'input': {'csv':'Datum,Lieferant,Betrag\n2026-09-25,Öko GmbH,\n',
+                   'columns':{'vendor':'Lieferant','amount':'Betrag','date':'Datum'}},
+         'output': {'rows':[{'vendor':'Öko GmbH','amount':None,'date':'2026-09-25'}]}}
+    ]}
+TEMPLATES.append(CSV_COLUMNS)
+SOURCES[contract_id(CSV_COLUMNS)] = CSV_COLUMNS_SOURCE

@@ -7,7 +7,7 @@ import pytest
 from casajev.contracts import contract, digest, validate_task
 from casajev.engine import Harness
 from casajev.jev import DemoJev, selected
-from casajev.runner import Runner, PROFILE, WORKER_PYTHON, bounded_process, review_source
+from casajev.runner import Runner, PROFILE, WORKER_PYTHON, bounded_process, review_source, ToolExecutionError
 from casajev.store import Store
 from casajev.templates import CSV, CSV_SOURCE, SORT, SUM, SOURCES
 from casajev.contracts import contract_id
@@ -28,7 +28,7 @@ def test_roundtrip_and_durable_reuse(harness):
     first = harness.run(harness.create(example())['id'])
     assert first['status'] == 'completed'
     assert first['builds'] == 1
-    assert first['verification'] == 'independent_expected_result'
+    assert first['verification'] == 'task_supplied_expected_result_match'
     fresh = Harness(Store(harness.store.root), DemoJev(), Runner())
     second = fresh.run(fresh.create(example())['id'])
     assert second['status'] == 'completed'
@@ -145,7 +145,7 @@ def test_csv_exact_semantics_and_malformed_input():
     runner = Runner()
     result = runner.run(CSV_SOURCE, 'name,n\nA,01\na,01\n A,01\nA,1\nA,01\n')
     assert result == {'groups': [[1,5]], 'records': 5, 'extra_duplicates': 1}
-    with pytest.raises(ValueError):
+    with pytest.raises(ToolExecutionError):
         runner.run(CSV_SOURCE, 'a,b\nonly-one\n')
 
 

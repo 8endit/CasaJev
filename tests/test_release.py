@@ -61,7 +61,7 @@ def prepared_harness(tmp_path, runner):
 def test_transient_retry_completes_without_builder(tmp_path):
     runner=Flaky();h,state,identity=prepared_harness(tmp_path,runner)
     result=h.run(state['id'])
-    assert result['status']=='completed' and result['result']==5
+    assert result['status']=='completed_unverified' and result['result']==5
     assert result['builder_calls']==0 and runner.calls==2 and identity in h.store.tools()
     assert 'tool_transient_failure' in [e['kind'] for e in h.store.events(state['id'])]
 
@@ -85,7 +85,7 @@ def test_interrupt_saves_and_resumes_without_gpt(tmp_path):
     h.cancel_event.set()
     assert h.run(state['id'])['status']=='paused' and runner.calls==0
     h.cancel_event.clear()
-    assert h.run(state['id'])['status']=='completed'
+    assert h.run(state['id'])['status']=='completed_unverified'
 
 
 def test_subprocess_can_be_interrupted():
@@ -185,8 +185,8 @@ def test_jev_can_drive_enabled_mcp_without_builder(tmp_path):
         h=Harness(manager.library.store,ExternalJev(),Runner(),connectors=manager,execution_mode='jev_only',use_graph=False)
         task=h.create({'goal':'Look up pear','objects':{'args':{'kind':'json','description':'query','value':{'query':'pear'}}},'permissions':['external_read']})
         result=h.run(task['id'])
-        assert result['status']=='completed' and result['result']=={'found':'pear'} and result['builder_calls']==0
-        assert result['verification'].startswith('external_source') and result['observations'][0]['validated'] is False
+        assert result['status']=='completed_unverified' and result['result']=={'found':'pear'} and result['builder_calls']==0
+        assert result['verification']=='no_goal_oracle' and result['observations'][0]['validated'] is False
     finally: manager.close()
 
 

@@ -215,7 +215,7 @@ class ActionAgent:
         verified=deterministic_dom_completion(goal,observed,action_history)
         if verified:
             return {'status':'done','phase':'result','goal_complete':True,
-                    'completion_evidence':verified,'summary':'Der angeforderte Seitenzustand ist verifiziert.',
+                    'completion_evidence':verified,'summary':'Der angeforderte Seitenzustand ist sichtbar.',
                     'question':'','capability':'','commands':[]},{'planner':'code_verify','accepted':True}
         actions,commands=dom_action_candidates(goal,observed,action_history)
         if len(actions)<=1:
@@ -391,7 +391,10 @@ class ActionAgent:
             done_supported=(not persistent_goal or (plan.get('goal_complete') is True and
                 plan.get('phase')=='result' and bool(plan.get('completion_evidence','').strip())))
             if plan['status']=='done' and done_supported:
-                return {'status':'completed','text':plan['summary'] or 'Aktion abgeschlossen.',
+                return {'status':'completed_unverified',
+                        'text':(plan['summary'] or 'Aktion abgeschlossen.') +
+                               ' Der Zielzustand wurde nicht unabhängig geprüft.',
+                        'verification':'observed_page_state_only',
                         'url':observed['url'],'trace':trace}
             if plan['status']=='done' and not done_supported:
                 record['status']='continue'

@@ -61,7 +61,7 @@ def test_chat_submission_and_continuity(tmp_path):
         chat.submit({'conversation':cid,'message':'zweite Nachricht'})
     chat.process(cid)
     convo=chat.read(cid)
-    assert convo['messages'][-1]['status']=='done'
+    assert convo['messages'][-1]['status']=='unverified'
     assert convo['messages'][-1]['result']['groups']==[[1,2]]
     cid2=chat.submit({'conversation':cid,'message':'Und noch eine Frage dazu'})
     assert cid2==cid
@@ -142,7 +142,8 @@ def test_visible_todomvc_command_overrides_language_refusal(tmp_path):
     chat.process(cid)
     last=chat.read(cid)['messages'][-1]
     assert last['route']=='action_task'
-    assert last['text']=='Vier Aufgaben angelegt, zwei erledigt und aktive Aufgaben gefiltert.'
+    assert last['text'].startswith('Vier Aufgaben angelegt, zwei erledigt und aktive Aufgaben gefiltert.')
+    assert last['status']=='unverified'
     assert assistant.contexts==[]
     assert assistant.action_contexts[0]['visible_browser']['title']=='TodoMVC'
     assert ('status',{}) in browser.calls
@@ -318,7 +319,8 @@ def test_action_mode_keeps_goal_across_targeted_followup(tmp_path):
     chat.process(cid)
     convo=chat.read(cid)
     assert 'pending_action' not in convo
-    assert convo['messages'][-1]['text']=='Die Runde wurde sichtbar beendet.'
+    assert convo['messages'][-1]['text'].startswith('Die Runde wurde sichtbar beendet.')
+    assert convo['messages'][-1]['status']=='unverified'
     assert 'Nutzerantwort: Jev' in assistant.contexts[-1]['trusted_goal']
 
 
@@ -347,7 +349,7 @@ def test_action_mode_binds_normal_click_to_observed_element(tmp_path):
     result=ActionAgent(browser,Assistant(),max_rounds=2).run('Öffne Learn more',{})
     click=next(data for action,data in browser.calls if action=='click')
     assert (click['x'],click['y'])==(123,234)
-    assert result['status']=='completed'
+    assert result['status']=='completed_unverified'
 
 
 def test_action_mode_reobserves_after_first_dom_changing_command(tmp_path):
@@ -382,7 +384,7 @@ def test_action_mode_reobserves_after_first_dom_changing_command(tmp_path):
             return {'url':'https://example.com/todos','title':'Todos','width':800,'height':600,'image':''}
     browser=Browser();assistant=Assistant()
     result=ActionAgent(browser,assistant,max_rounds=3).run('Markiere den ersten Eintrag',{})
-    assert result['status']=='completed'
+    assert result['status']=='completed_unverified'
     assert [action for action,_ in browser.calls].count('click')==1
     assert browser.observations==2
     history=assistant.contexts[1]['browser_action_history']
@@ -485,7 +487,7 @@ def test_round_goal_cannot_finish_when_only_game_start_is_visible(tmp_path):
                         'text':'','elements':[],'image':base64.b64encode(b'jpg').decode()}
             return {'url':'https://hole.io','title':'Hole'}
     browser=Browser();result=ActionAgent(browser,Assistant(),max_rounds=2).run('Spiele eine Runde Hole.io',{})
-    assert result['status']=='completed'
+    assert result['status']=='completed_unverified'
     assert browser.observations==2
     assert result['trace'][0]['status']=='continue'
 
@@ -518,7 +520,7 @@ def test_dom_fast_path_uses_structured_state_without_screenshot_or_gpt(tmp_path)
     browser=Browser()
     result=ActionAgent(browser,Assistant(),decision_controller=DecisionController(Policy())).run(
         'Aktiviere die Funktion',{'permissions':['interactive_browser']})
-    assert result['status']=='completed'
+    assert result['status']=='completed_unverified'
     assert [item['planner'] for item in result['trace']]==['jev_dom','jev_dom']
     assert ('state',{}) not in browser.calls
     assert all(data=={'include_image':False} for action,data in browser.calls if action=='action_state')
@@ -553,7 +555,7 @@ def test_dom_fast_path_falls_back_to_visual_planner_when_uncertain(tmp_path):
     browser=Browser()
     result=ActionAgent(browser,Assistant(),decision_controller=DecisionController(Policy())).run(
         'Öffne den unklaren Bereich',{'permissions':['interactive_browser']})
-    assert result['status']=='completed'
+    assert result['status']=='completed_unverified'
     assert result['trace'][0]['planner']=='gpt_vision'
     assert ('state',{}) in browser.calls
 

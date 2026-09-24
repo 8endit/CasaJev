@@ -1,0 +1,47 @@
+[
+  {
+    "id": "w01_exact",
+    "family": "reuse",
+    "goal": "Finde exakt gleiche vollständige CSV-Datensätze ohne Normalisierung. Gib Gruppen der Datensatznummern ab 1 ohne Kopfzeile, Datensatzanzahl und zusätzliche Dubletten zurück.",
+    "csv": "kunde,region,betrag\nA,Nord,10\nB,Süd,4\nA,Nord,10\nA,Nord,010\nB,Süd,4\n",
+    "expected": {"groups": [[1, 3], [2, 5]], "records": 5, "extra_duplicates": 2},
+    "expected_status": "completed",
+    "expected_new_capability": false
+  },
+  {
+    "id": "w02_exact_new_data",
+    "family": "reuse",
+    "goal": "Finde exakt gleiche vollständige CSV-Datensätze ohne Normalisierung. Gib Gruppen der Datensatznummern ab 1 ohne Kopfzeile, Datensatzanzahl und zusätzliche Dubletten zurück.",
+    "csv": "kunde,region,betrag\n\"C, GmbH\",West,8\nD,Ost,0\n\"C, GmbH\",West,8\nc,West,8\nD,Ost,0\n",
+    "expected": {"groups": [[1, 3], [2, 5]], "records": 5, "extra_duplicates": 2},
+    "expected_status": "completed",
+    "expected_new_capability": false
+  },
+  {
+    "id": "w03_changed_rule",
+    "family": "new_rule",
+    "goal": "Finde doppelte vollständige CSV-Datensätze nach trimmen von Rand-Leerzeichen und Unicode-casefold je Zelle. Gib Gruppen der Datensatznummern ab 1 ohne Kopfzeile, Datensatzanzahl und zusätzliche Dubletten zurück. Das bisherige Werkzeug für exakte Dubletten erfüllt diese Regel nicht.",
+    "csv": "kunde,region\nAda,Nord\n ada ,NORD\nBerta,West\nBERTA,west\nAda,Süd\n",
+    "expected": {"groups": [[1, 2], [3, 4]], "records": 5, "extra_duplicates": 2},
+    "expected_status": "completed",
+    "expected_new_capability": true
+  },
+  {
+    "id": "w04_filter_group_sum",
+    "family": "multi_step",
+    "goal": "Verarbeite die CSV mit Spalten kunde,region,betrag. Filtere nur Zeilen mit region exakt Nord, gruppiere nach kunde und summiere den ganzzahligen betrag. Gib ein JSON-Objekt mit kundennamen als Schlüsseln und Summen als Werten zurück. Keine stillschweigende Korrektur von Eingaben.",
+    "csv": "kunde,region,betrag\nAda,Nord,10\nAda,Süd,100\nBerta,Nord,-2\nAda,Nord,7\nBerta,Nord,5\nCem,West,30\n",
+    "expected": {"Ada": 17, "Berta": 3},
+    "expected_status": "completed",
+    "expected_new_capability": true
+  },
+  {
+    "id": "w05_broken_csv",
+    "family": "invalid_input",
+    "goal": "Verarbeite die CSV mit Spalten kunde,region,betrag. Filtere nur Zeilen mit region exakt Nord, gruppiere nach kunde und summiere den ganzzahligen betrag. Bei fehlenden Feldern halte an; erfinde keinen Betrag.",
+    "csv": "kunde,region,betrag\nAda,Nord,10\nBerta,Nord\nAda,Nord,7\n",
+    "expected": null,
+    "expected_status": "halted",
+    "expected_new_capability": false
+  }
+]

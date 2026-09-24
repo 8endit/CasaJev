@@ -1,4 +1,6 @@
 import copy
+import csv
+import io
 import threading
 import time
 from .contracts import canonical, contract, contract_id, digest, validate, validate_task
@@ -15,6 +17,16 @@ class BudgetExceeded(RuntimeError):
 
 class StaleState(RuntimeError):
     pass
+
+
+def validate_csv_shape(payload):
+    """Reject malformed CSV before treating a data error as a tool defect."""
+    try:
+        rows = list(csv.reader(io.StringIO(payload), strict=True))
+    except csv.Error as exc:
+        raise ValueError('Malformed CSV: ' + str(exc)) from exc
+    if rows and any(len(row) != len(rows[0]) for row in rows[1:]):
+        raise ValueError('Inconsistent CSV width')
 
 
 class Harness:
@@ -309,6 +321,13 @@ class Harness:
         if digest(entry['source']) != entry['source_hash']:
             self.store.revoke(tool_id)
             raise ValueError('Tool integrity mismatch; revoked')
+        if state['objects'][ref]['kind'] == 'csv':
+            try:
+                validate_csv_shape(state['objects'][ref]['value'])
+            except ValueError as exc:
+                self.store.event(state['id'], 'invalid_input', {'input_ref': ref, 'error': str(exc)})
+                self.pause(state, str(exc), 'invalid_input')
+                return
         attempts = state.setdefault('tool_attempts', {})
         if attempts.get(call_hash, 0) >= self.max_tool_retries + 1:
             self.pause(state, 'Wiederholungslimit für diesen Werkzeugaufruf erreicht.', 'failed')

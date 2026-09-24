@@ -164,3 +164,58 @@ def test_boolean_json_subschema_is_not_a_mapping_protocol():
     spec = copy.deepcopy(CSV_COLUMNS)
     spec['input_schema']['properties']['csv'] = True
     assert bound_inputs({'kind':'csv','value':'a,b,c\n1,2,3\n'}, spec) == []
+
+
+def test_decision_sees_bounded_result_values_and_mapping_before_optional_done(tmp_path):
+    store, runner = Store(tmp_path), Runner()
+    store.register(CSV_COLUMNS, CSV_COLUMNS_SOURCE, runner.verify(CSV_COLUMNS, CSV_COLUMNS_SOURCE))
+    class EvidenceAwareJev:
+        mode = 'test'
+        last = {}
+        saw_result = False
+        def ask(self, compiled, questions):
+            options = questions['action']['criteria']
+            if not compiled['observations']:
+                for key, item in options.items():
+                    if isinstance(item, dict) and item.get('input_binding') == {
+                            'vendor':'Lieferant','amount':'Summe','date':'Belegtag'}:
+                        return {'action':key}
+                raise AssertionError('The bound existing tool was not offered')
+            row = compiled['last_result']['fields']['rows']['items'][0]['fields']
+            binding = compiled['observations'][0]['input_binding']['fields']
+            self.saw_result = (row == {'vendor':'Nord, GmbH','amount':'0042','date':'2026-09-01'}
+                               and binding == {'vendor':'Lieferant','amount':'Summe','date':'Belegtag'}
+                               and bool(compiled['observations'][0]['source_hash'])
+                               and bool(compiled['observations'][0]['input_hash'])
+                               and bool(compiled['observations'][0]['output_hash']))
+            return {'action':'done' if self.saw_result else 'ask_user'}
+    jev = EvidenceAwareJev()
+    harness = Harness(store, jev, runner, use_graph=False, execution_mode='jev_only')
+    task = {'goal':'Map Lieferant, Summe, Belegtag to vendor, amount, date.',
+            'objects':{'source':{'kind':'csv','description':'Original CSV',
+                'value':'Lieferant,Summe,Belegtag\n"Nord, GmbH",0042,2026-09-01\n'}}}
+    state = harness.run(harness.create(task)['id'])
+    assert jev.saw_result
+    assert state['status'] == 'completed_unverified'
+    assert state['outcome_kind'] == 'unverified'
+
+
+def test_observation_alone_does_not_force_completion(tmp_path):
+    store, runner = Store(tmp_path), Runner()
+    store.register(CSV_COLUMNS, CSV_COLUMNS_SOURCE, runner.verify(CSV_COLUMNS, CSV_COLUMNS_SOURCE))
+    class StillUnsure:
+        mode = 'test'
+        last = {}
+        def ask(self, compiled, questions):
+            if compiled['observations']:
+                return {'action':'ask_user'}
+            return {'action':next(key for key, item in questions['action']['criteria'].items()
+                if isinstance(item, dict) and item.get('input_binding') == {
+                    'vendor':'Supplier','amount':'Net','date':'Day'})}
+    harness = Harness(store, StillUnsure(), runner, use_graph=False, execution_mode='jev_only')
+    state = harness.run(harness.create({'goal':'An unrelated unknown goal', 'objects':{
+        'source':{'kind':'csv','description':'Original CSV',
+                  'value':'Supplier,Net,Day\nAcme,1,2026-09-24\n'}}})['id'])
+    assert state['status'] == 'needs_input'
+    assert state['result'] is not None
+    assert state.get('verification') is None

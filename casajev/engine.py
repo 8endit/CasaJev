@@ -112,6 +112,7 @@ class Harness:
                 'capability_request': state.get('wish'),
                 'permissions': state['permissions'], 'objects': state['objects'],
                 'observations': state['observations'][-8:],
+                'result': state.get('result'),
                 'available_tools': {key: item['spec'] for key, item in self.store.tools().items()}}
         if self.use_graph:
             from .workflows import hints

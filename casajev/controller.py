@@ -34,12 +34,12 @@ class EscalationTrigger(str, Enum):
 
 def _compact(value: Any, *, depth: int = 0) -> Any:
     """Produce a deterministic, bounded observation rather than raw-world data."""
-    if depth >= 3:
-        return {'type': type(value).__name__, 'digest': digest(value)}
     if value is None or type(value) in (bool, int, float):
         return value
     if isinstance(value, str):
         return value if len(value) <= 600 else value[:600] + f'… [{len(value)} chars]'
+    if depth >= 3:
+        return {'type': type(value).__name__, 'digest': digest(value)}
     if isinstance(value, list):
         return {'type': 'list', 'count': len(value),
                 'items': [_compact(item, depth=depth + 1) for item in value[:8]],
@@ -62,7 +62,9 @@ class StateCompiler:
         observations = []
         for item in mission.get('observations', [])[-5:]:
             observations.append({key: _compact(item[key]) for key in
-                ('tool', 'input_ref', 'output_ref', 'result', 'validated', 'validation') if key in item})
+                ('tool', 'input_ref', 'output_ref', 'result', 'validated', 'validation',
+                 'input_binding', 'input_hash', 'output_hash', 'source_hash', 'contract_hash')
+                if key in item})
         extra = {key: _compact(mission[key]) for key in
                  ('clarification', 'capability_request', 'available_tools',
                   'available_data_tools', 'external_tools', 'available_external_tools',

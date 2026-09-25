@@ -392,7 +392,29 @@ class Harness:
             messages = {'need_data': 'Source data is missing. Add the required object.',
                         'ask_user': 'Specify the desired result more precisely.',
                         'need_permission': 'This action needs an external connector and permission beyond pure data computation.'}
-            self.pause(state, messages[action], 'needs_input' if action != 'need_permission' else 'needs_permission')
+            message = messages[action]
+            if (action == 'ask_user' and state.get('execution_mode',self.execution_mode) == 'standard'
+                    and self.builder is not None and hasattr(self.builder,'clarify')):
+                if state['builder_calls'] < self.limits['builder_calls']:
+                    clarification_context = self.controller.compiler.compile(context, {})
+                    try:
+                        draft = self.builder_call(state, 'clarify', clarification_context)
+                        if (not isinstance(draft,str) or not 5 <= len(draft.strip()) <= 400
+                                or '\n' in draft or not draft.strip().endswith('?')):
+                            raise ValueError('Clarification must be one bounded question')
+                        message = draft.strip()
+                        self.store.event(state['id'], 'clarification_drafted',
+                                         {'question':message,'context_hash':digest(clarification_context)})
+                    except (InterruptedError, BudgetExceeded):
+                        raise
+                    except Exception as exc:
+                        message = messages[action]
+                        self.store.event(state['id'], 'clarification_unavailable',
+                                         {'reason':type(exc).__name__})
+                else:
+                    self.store.event(state['id'], 'clarification_unavailable',
+                                     {'reason':'builder_call_budget_exhausted'})
+            self.pause(state, message, 'needs_input' if action != 'need_permission' else 'needs_permission')
         else:
             raise ValueError('Unrecognized action')
 

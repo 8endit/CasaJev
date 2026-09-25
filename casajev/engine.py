@@ -10,6 +10,7 @@ from .templates import TEMPLATES, SOURCES
 from .runner import TransientWorkerError, ToolRejectedInput, ToolExecutionError, ToolCodeError
 from .vendor.retry import jittered_backoff
 from .controller import DecisionController, JevDecisionPolicy
+from .connectors import ConnectorContractError
 
 
 class BudgetExceeded(RuntimeError):
@@ -241,6 +242,9 @@ class Harness:
             except TimeoutError as exc:
                 state['outcome_kind'] = 'timeout'
                 self.pause(state, str(exc), 'failed')
+            except ConnectorContractError as exc:
+                state['outcome_kind'] = 'contract_failure'
+                self.pause(state, str(exc), 'needs_review')
             except Exception as exc:
                 state['outcome_kind'] = 'runtime_error'
                 self.pause(state, str(exc)[:3000], 'paused' if self.cancel_event.is_set() else 'failed')
@@ -324,14 +328,19 @@ class Harness:
             self.store.save(state, 'connector_started', {'tool':identity,'input_ref':ref,'schema_hash':schema_hash})
             started = time.monotonic()
             result = self.connectors.call(identity, state['objects'][ref]['value'], schema_hash)
+            executed_schema_hash = self.connectors.tools()[identity]['schema_hash']
             if len(canonical(result)) > 300000: raise ValueError('Connector-Ergebnis zu groß für diesen Auftrag.')
             ref_out = 'result_'+str(len(state['observations'])+1)
             state['objects'][ref_out] = {'kind':'text' if isinstance(result,str) else 'json',
                 'description':'Untrusted external tool result', 'value':result}
             state['result'] = result
             state['seen_calls'].append(call_hash)
+            executed_call_hash = digest([identity,executed_schema_hash,state['objects'][ref]['value']])
+            if executed_call_hash != call_hash:
+                state['seen_calls'].append(executed_call_hash)
             state['observations'].append({'tool':identity,'input_ref':ref,'output_ref':ref_out,'result':result,
-                'validated':False,'validation':'MCP success and input schema; no independent factual oracle',
+                'validated':False,'validation':'MCP success and declared schemas where supplied; no independent factual oracle',
+                'selected_schema_hash':schema_hash,'executed_schema_hash':executed_schema_hash,
                 'input_hash':digest(state['objects'][ref]['value']),'output_hash':digest(result),
                 'seconds':time.monotonic()-started})
             self.store.save(state,'connector_completed',state['observations'][-1])

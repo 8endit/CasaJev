@@ -10,6 +10,63 @@ import time
 from .contracts import canonical, check_schema, digest, validate
 from .runner import _terminate_process
 
+
+class ConnectorContractError(ValueError):
+    """The selected MCP catalogue snapshot no longer matches an observed call."""
+
+
+def _optional_input_extension(before, after):
+    """Recognize only a narrow, syntactic object-schema extension.
+
+    This does not attest unchanged server semantics. It only allows a request
+    accepted by the old schema to remain valid after optional fields appear.
+    """
+    if not isinstance(before, dict) or not isinstance(after, dict):
+        return False
+    for item in (before, after):
+        if 'output_schema' not in item or 'schema_hash' not in item:
+            return False
+        expected_hash = digest({'name':item.get('name'),'description':item.get('description'),
+                                'input_schema':item.get('input_schema'),
+                                'output_schema':item.get('output_schema')})
+        if item['schema_hash'] != expected_hash:
+            return False
+    if any(before.get(key) != after.get(key) for key in ('name', 'description', 'output_schema', 'supported')):
+        return False
+    old, new = before.get('input_schema'), after.get('input_schema')
+    if not isinstance(old, dict) or not isinstance(new, dict):
+        return False
+    allowed = {'type', 'properties', 'required', 'additionalProperties'}
+    if set(old) - allowed or set(new) - allowed or old.get('type') != 'object' or new.get('type') != 'object':
+        return False
+    if old.get('required', []) != new.get('required', []):
+        return False
+    # With open additional properties, adding a named property can narrow the
+    # set of previously valid requests. Keep automatic preservation closed.
+    if old.get('additionalProperties') is not False or new.get('additionalProperties') is not False:
+        return False
+    old_props, new_props = old.get('properties', {}), new.get('properties', {})
+    if not isinstance(old_props, dict) or not isinstance(new_props, dict):
+        return False
+    added = set(new_props) - set(old_props)
+    return bool(added) and all(new_props.get(key) == value for key, value in old_props.items()) \
+        and not (added & set(new.get('required', [])))
+
+
+def _catalogue_compatible(before, after):
+    if not isinstance(before, list) or len(before) != len(after):
+        return False
+    old = {item.get('name'): item for item in before if isinstance(item, dict)}
+    if len(old) != len(before):
+        return False
+    for item in after:
+        prior = old.get(item['name'])
+        if prior is None:
+            return False
+        if prior != item and not _optional_input_extension(prior, item):
+            return False
+    return True
+
 class MCPConnection:
     def __init__(self, config, cwd, cancel_event=None):
         self.config, self.cwd, self.cancel_event = config, str(cwd), cancel_event
@@ -160,18 +217,26 @@ class Connectors:
             for tool in result['tools']:
                 if not isinstance(tool,dict) or not isinstance(tool.get('name'),str): raise ValueError('Ungültiger Werkzeugname.')
                 schema = tool.get('inputSchema',{'type':'object','properties':{}})
+                output_schema = tool.get('outputSchema')
                 supported = True
-                try: check_schema(schema)
+                try:
+                    check_schema(schema)
+                    if 'outputSchema' in tool:
+                        check_schema(output_schema)
                 except Exception: supported = False
-                found.append({'name':tool['name'],'description':str(tool.get('description',''))[:4000],
-                    'input_schema':schema,'supported':supported,'schema_hash':digest(schema)})
+                description = str(tool.get('description',''))[:4000]
+                found.append({'name':tool['name'],'description':description,
+                    'input_schema':schema,'output_schema':output_schema,'supported':supported,
+                    'schema_hash':digest({'name':tool['name'],'description':description,
+                                          'input_schema':schema,'output_schema':output_schema})})
                 if len(found)>200: raise ValueError('Bitte einen kleineren MCP-Werkzeugkatalog konfigurieren.')
             cursor = result.get('nextCursor')
             if not cursor: break
         else: raise ValueError('MCP-Katalog enthält zu viele Seiten.')
         if len({t['name'] for t in found}) != len(found): raise ValueError('Doppelte MCP-Werkzeugnamen.')
-        # Any changed descriptor requires explicit selection again.
-        if digest(found)!=digest(config.get('tools',[])):
+        # A legacy snapshot or any change beyond a narrow optional input
+        # extension requires explicit selection again.
+        if digest(found)!=digest(config.get('tools',[])) and not _catalogue_compatible(config.get('tools',[]),found):
             config.update(enabled=False,allowed_tools=[])
         config.update(tools=found,checked_at=time.time())
         self.library.put('connectors',config)
@@ -188,17 +253,36 @@ class Connectors:
         return tools
 
     def call(self, identity, arguments, schema_hash):
+        selected = self.tools().get(identity)
+        if not selected or selected['schema_hash'] != schema_hash:
+            raise ConnectorContractError('Werkzeug wurde verändert oder nicht freigegeben.')
+        # Reinspect immediately before execution. The selected snapshot may be
+        # old only when this refresh proves a narrow optional input extension.
+        self.inspect(selected['connector'])
         tool = self.tools().get(identity)
-        if not tool or tool['schema_hash'] != schema_hash: raise ValueError('Werkzeug wurde verändert oder nicht freigegeben.')
-        validate(arguments,tool['input_schema'])
+        if not tool or (tool['schema_hash'] != schema_hash and
+                        not _optional_input_extension(selected,tool)):
+            raise ConnectorContractError('MCP-Werkzeugvertrag wurde vor dem Aufruf verändert.')
+        try:
+            validate(arguments,tool['input_schema'])
+        except Exception as exc:
+            raise ConnectorContractError('MCP-Eingabe verletzt den aktuellen Werkzeugvertrag.') from exc
         config = self.get(tool['connector'])
         result = self.connection(config).request('tools/call',{'name':tool['name'],'arguments':arguments})
         if not isinstance(result,dict) or result.get('isError'): raise RuntimeError('Das externe Werkzeug hat keinen erfolgreichen Aufruf bestätigt.')
-        if 'structuredContent' in result: return result['structuredContent']
-        blocks = result.get('content')
-        if not isinstance(blocks,list): raise ValueError('MCP-Ergebnis enthält keine unterstützten Inhalte.')
-        texts = [b['text'] for b in blocks if isinstance(b,dict) and b.get('type')=='text' and isinstance(b.get('text'),str)]
-        if not texts: raise ValueError('Dieser Connector liefert kein Text-/JSON-Ergebnis.')
-        text = '\n'.join(texts)
-        try: return json.loads(text)
-        except ValueError: return text
+        if 'structuredContent' in result:
+            value = result['structuredContent']
+        else:
+            blocks = result.get('content')
+            if not isinstance(blocks,list): raise ValueError('MCP-Ergebnis enthält keine unterstützten Inhalte.')
+            texts = [b['text'] for b in blocks if isinstance(b,dict) and b.get('type')=='text' and isinstance(b.get('text'),str)]
+            if not texts: raise ValueError('Dieser Connector liefert kein Text-/JSON-Ergebnis.')
+            text = '\n'.join(texts)
+            try: value = json.loads(text)
+            except ValueError: value = text
+        if tool['output_schema'] is not None:
+            try:
+                validate(value,tool['output_schema'])
+            except Exception as exc:
+                raise ConnectorContractError('MCP-Ausgabe verletzt den geprüften Werkzeugvertrag.') from exc
+        return value

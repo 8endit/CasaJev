@@ -114,7 +114,11 @@ class CodexBuilder:
                   'Only pure Python data transformations with compute permission are supported; no files, network, side effects, scheduling or prose generation. '
                   'If missing data or an ambiguous goal prevents a contract, return no proposals and a concise German clarification question. '
                   'Each contract has input/output JSON schemas encoded as JSON strings and examples_json encoding an array '
-                  'of {input,output}. Give at least 3 diverse exact examples. Names snake_case. Use input kinds from context. '
+                  'of {input,output}. Give at least 3 diverse exact examples of successful results. '
+                  'If the goal requires rejecting invalid or ambiguous input, state the rejection rule in semantics; '
+                  'the examples format cannot encode rejection. Do not model rejection as a returned error object '
+                  'unless the trusted goal explicitly asks for error objects as data. '
+                  'Names snake_case. Use input kinds from context. '
                   'Function interface main(payload)->JSON. The original input is passed unchanged. Do not solve just the sample. '
                   'Use the exact user semantics. Never assume permission. New operation vocabulary is allowed. '
                   'Full context:\n' + canonical(context) + '\nPrevious rejected proposals/feedback:\n' + canonical(feedback))
@@ -131,6 +135,11 @@ class CodexBuilder:
                   'Return source as JSON, no markdown. No shell/tools needed. No files, network, printing or side effects. '
                   'Allowed imports: csv,io,json,math,statistics,collections,itertools,functools,decimal,datetime,re,operator,string. '
                   'No private/dunder identifiers, getattr, eval, exec, open, classes or dynamic imports. '
-                  'Payload is already decoded JSON. Return a JSON value. Handle edge cases.\nContract:\n' + canonical(spec) +
+                  'Payload is already decoded JSON. Return a JSON value for valid inputs. Handle edge cases. '
+                  'If contract semantics requires a domain rejection for invalid, malformed or ambiguous input, '
+                  'raise InputRejected(message). InputRejected is already available in the worker namespace: '
+                  'do not import it or define your own class. A returned {"error": ...} is a successful value, '
+                  'not a rejection, unless the trusted goal explicitly asks for error objects as data. '
+                  'Contract examples describe successful outputs only; implement the stated rejection rules too.\nContract:\n' + canonical(spec) +
                   '\nVerifier feedback from previous attempt:\n' + canonical(error))
         return self.invoke(prompt, SOURCE_SCHEMA, escalate)['source']

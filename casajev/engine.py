@@ -52,8 +52,10 @@ def bound_inputs(obj, spec):
             all(isinstance(role, str) for role in roles)):
         return []
     headers = validate_csv_shape(value)
-    if not headers or any(not cell for cell in headers) or len(set(cell.casefold() for cell in headers)) != len(headers):
-        raise ValueError('Missing, empty or ambiguous CSV header for column mapping')
+    if not headers or any(not cell for cell in headers):
+        raise ValueError('Missing or empty CSV header for column mapping')
+    if len(set(cell.casefold() for cell in headers)) != len(headers):
+        raise ValueError('Duplicate or ambiguous CSV header for column mapping')
     if len(headers) > 6 or len(headers) < len(roles):
         return []
     result = []
@@ -291,7 +293,8 @@ class Harness:
                                        'risk':'read'}
         if not bindings and not external_bindings and not state['observations']:
             malformed = next(((ref, error) for ref, error in binding_errors
-                              if error.startswith(('Malformed CSV:', 'Inconsistent CSV width'))), None)
+                              if error.startswith(('Malformed CSV:', 'Inconsistent CSV width',
+                                                   'Duplicate or ambiguous CSV header for column mapping'))), None)
             if malformed:
                 ref, error = malformed
                 state['outcome_kind'] = 'domain_rejection'

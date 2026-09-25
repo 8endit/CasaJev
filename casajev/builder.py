@@ -120,7 +120,13 @@ class CodexBuilder:
                   'the examples format cannot encode rejection. Do not model rejection as a returned error object '
                   'unless the trusted goal explicitly asks for error objects as data. '
                   'Names snake_case. Use input kinds from context. '
-                  'Function interface main(payload)->JSON. The original input is passed unchanged. Do not solve just the sample. '
+                  'Function interface main(payload)->JSON. The original input is passed unchanged. '
+                  'The input_schema must validate an existing object value directly: a CSV object value is a raw string, '
+                  'while an existing JSON object value can satisfy an object schema directly. '
+                  'Do not invent {"csv": ...} or {"source_csv": ...} wrappers for a raw CSV string. '
+                  'Only the existing CSV+columns adapter can bind a raw CSV string to an object input schema, '
+                  'and only when that schema explicitly requires csv plus a columns mapping with named roles. '
+                  'No arbitrary wrapping or preprocessing is available. Do not solve just the sample. '
                   'Use the exact user semantics. Never assume permission. New operation vocabulary is allowed. '
                   'Full context:\n' + canonical(context) + '\nPrevious rejected proposals/feedback:\n' + canonical(feedback))
         result = self.invoke(prompt, PROPOSAL_SCHEMA)

@@ -47,6 +47,7 @@ def test_reuses_identical_parameterized_tool_with_new_headers(tmp_path):
         assert state['result'] == expected
         assert state['verification'] == 'task_supplied_expected_result_match'
         assert state['builds'] == 0
+        assert state['builder_calls'] == 0 and state['jev_calls'] > 0
         observation = state['observations'][0]
         assert observation['tool'] == tool_id
         assert observation['input_binding'] == mapping
@@ -86,6 +87,37 @@ def test_malformed_csv_is_domain_rejection_without_tool_run(tmp_path):
     assert not state['observations']
 
 
+@pytest.mark.parametrize('header', ['Supplier,Net,net,Day', 'Supplier,Net,Net,Day'])
+def test_duplicate_mapping_header_rejects_before_jev_or_builder(tmp_path, header):
+    store, runner = Store(tmp_path), Runner()
+    tool_id = store.register(CSV_COLUMNS, CSV_COLUMNS_SOURCE,
+                             runner.verify(CSV_COLUMNS, CSV_COLUMNS_SOURCE))
+    class NoCalls:
+        mode = 'test'
+        last = None
+        def ask(self, *args):
+            raise AssertionError('Duplicate header must be rejected before Jev')
+    class NoBuilder:
+        def __getattr__(self, name):
+            raise AssertionError('Duplicate header must be rejected before Builder')
+    harness = Harness(store, NoCalls(), runner, NoBuilder(), use_templates=False,
+                      use_graph=False)
+    state = harness.run(harness.create({'goal':'Map Supplier, Net and Day to vendor, amount and date.',
+        'objects':{'source':{'kind':'csv','description':'Original CSV',
+                             'value':header+'\nAcme,1,2,2026-09-24\n'}}})['id'])
+    assert state['status'] == 'invalid_input'
+    assert state['outcome_kind'] == 'domain_rejection'
+    assert state['result'] is None and not state['observations']
+    assert state['jev_calls'] == state['builder_calls'] == state['builds'] == 0
+    assert tool_id in store.tools()
+    events = store.events(state['id'])
+    assert not any(event['kind'] in ('tool_started', 'builder_result', 'jev_decision')
+                   for event in events)
+    assert any(event['kind'] == 'invalid_input' and
+               'Duplicate or ambiguous CSV header' in event['body']['error']
+               for event in events)
+
+
 @pytest.mark.parametrize('csv_text', [
     'Supplier,Net,Net\nAcme,1,2026-09-24\n',
     'Supplier,Net,Day\nAcme,1,2026-02-30\n'])
@@ -95,12 +127,10 @@ def test_ambiguous_header_or_invalid_date_does_not_complete(tmp_path, csv_text):
     harness = Harness(store, HeaderChoice(), runner, use_graph=False, execution_mode='jev_only')
     state = harness.run(harness.create({'goal':'Read mapped CSV', 'objects':{
         'source':{'kind':'csv','description':'Original CSV','value':csv_text}}})['id'])
+    assert state['status'] == 'invalid_input'
+    assert state['outcome_kind'] == 'domain_rejection'
     if csv_text.startswith('Supplier,Net,Net'):
-        # This header is ambiguous for this tool, but may suit another contract.
-        assert state['status'] == 'needs_review'
-    else:
-        assert state['status'] == 'invalid_input'
-        assert state['outcome_kind'] == 'domain_rejection'
+        assert state['jev_calls'] == state['builder_calls'] == 0
     assert state['result'] is None
     if '2026-02-30' in csv_text:
         assert state['rejection_verified'] is False

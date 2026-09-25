@@ -119,7 +119,11 @@ class JevDecisionPolicy:
     def decide(self, *, state, actions, goal, instructions='Select the next action.', questions=None, decision_key='action'):
         query = dict(questions or {})
         query[decision_key] = choice(instructions, actions)
-        answers = self.jev.ask(state, query)
+        # The complete action descriptions are already in query criteria.
+        # Keep the compiled state intact for audit and supervisor review, but
+        # avoid repeating that large list in the provider request.
+        provider_state = {key: value for key, value in state.items() if key != 'available_actions'}
+        answers = self.jev.ask(provider_state, query)
         action = answers.get(decision_key)
         confidence = 1.0 if action is not None else 0.0
         distribution = {}

@@ -1,7 +1,9 @@
 import pytest
 
-from casajev.controller import (ConfidenceGate, Decision, DecisionController,
+from casajev.controller import (ConfidenceGate, Decision, DecisionController, JevDecisionPolicy,
                                 FastLoop, StateCompiler)
+from casajev.contracts import canonical
+from casajev.jev import choice
 from casajev.laya import LayaCapacityError, LayaDecisionPolicy
 from casajev.realtime import RealtimeController, from_settings
 from casajev.settings import save_settings
@@ -63,6 +65,47 @@ def test_decision_policy_is_replaceable_without_changing_controller():
     decision, _state = controller.choose({'goal':'Test','objects':{},'observations':[]},
         {'local_action':{'risk':'compute'}}, 'Choose.')
     assert decision.accepted and decision.action == 'local_action'
+
+
+def test_jev_provider_sees_125_complete_options_once_while_audit_keeps_compiled_actions():
+    class CaptureJev:
+        mode = 'capture'
+        last = None
+
+        def ask(self, state, questions):
+            self.state, self.questions = state, questions
+            return {'action': 'use:98'}
+
+    actions = {f'use:{index}': {'tool': 'csv_columns_to_records',
+                               'input_ref': 'source_csv',
+                               'description': 'Map explicitly named CSV headers to vendor amount date',
+                               'input_binding': {'vendor': 'Supplier', 'amount': 'Net', 'date': 'Day'},
+                               'permissions': ['compute'], 'risk': 'compute'}
+               for index in range(120)}
+    actions.update({name: {'description': name, 'risk': 'passive'}
+                    for name in ('need_capability', 'need_data', 'ask_user', 'need_permission')})
+    actions['done'] = {'description': 'Observed result fulfills goal', 'risk': 'submit'}
+    provider = CaptureJev()
+    controller = DecisionController(JevDecisionPolicy(provider))
+    secondary = {'operation': choice('Choose an operation.', {'extract': 'extract', 'other': 'other'})}
+    decision, compiled = controller.choose(
+        {'goal': 'Convert the CSV', 'permissions': ['compute'], 'objects': {},
+         'observations': []}, actions, 'Select the next step.', secondary)
+
+    assert len(actions) == len(compiled['available_actions']) == len(provider.questions['action']['criteria']) == 125
+    assert provider.questions['action']['criteria'] == actions
+    assert provider.questions['operation'] == secondary['operation']
+    assert provider.questions['action']['criteria']['use:98']['input_binding'] == {
+        'vendor': 'Supplier', 'amount': 'Net', 'date': 'Day'}
+    assert provider.questions['action']['criteria']['use:98']['permissions'] == ['compute']
+    assert provider.questions['action']['criteria']['use:98']['risk'] == 'compute'
+    assert 'available_actions' not in provider.state
+    assert decision.accepted and decision.action == 'use:98' and decision.risk == 'compute'
+    # The controller's returned state, used by audit and supervisor paths, is unchanged.
+    assert 'use:98' in compiled['available_actions']
+    duplicate = canonical({'state': compiled, 'questions': provider.questions})
+    deduplicated = canonical({'state': provider.state, 'questions': provider.questions})
+    assert len(deduplicated) < len(duplicate)
 
 
 class FakeLayaRouter:

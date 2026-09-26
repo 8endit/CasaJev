@@ -21,7 +21,7 @@ def atomic_json(path, value):
     try:
         if hasattr(os, 'fchmod'):
             os.fchmod(fd, 0o600)
-        with os.fdopen(fd, 'w') as stream:
+        with os.fdopen(fd, 'w', encoding='utf-8') as stream:
             json.dump(value, stream, ensure_ascii=False)
             stream.flush()
             os.fsync(stream.fileno())
@@ -32,7 +32,7 @@ def atomic_json(path, value):
 
 def configuration(root):
     path = Path(root) / 'config.json'
-    return json.loads(path.read_text()) if path.exists() else {}
+    return json.loads(path.read_text(encoding='utf-8')) if path.exists() else {}
 
 def settings(root):
     config = configuration(root)
@@ -69,13 +69,13 @@ def save_settings(root, changes):
 
 def secret(root, name):
     path = Path(root) / 'credentials.json'
-    values = json.loads(path.read_text()) if path.exists() else {}
+    values = json.loads(path.read_text(encoding='utf-8')) if path.exists() else {}
     return values.get(name)
 
 def save_secret(root, name, value):
     if name != 'typesafe' or not isinstance(value, str) or not 8 <= len(value.strip()) <= 4096:
         raise ValueError('Bitte einen gültigen TypeSafe-Schlüssel eingeben.')
     path = Path(root) / 'credentials.json'
-    values = json.loads(path.read_text()) if path.exists() else {}
+    values = json.loads(path.read_text(encoding='utf-8')) if path.exists() else {}
     values[name] = value.strip()
     atomic_json(path, values)

@@ -230,9 +230,9 @@ def create_server(app, port):
             parsed = urlparse(self.path)
             path, query = parsed.path, parse_qs(parsed.query)
             try:
-                if path == '/': self.respond(200, (static / 'index.html').read_text(), 'text/html')
+                if path == '/': self.respond(200, (static / 'index.html').read_text(encoding='utf-8'), 'text/html')
                 elif path in ('/static/manage.js', '/static/manage.css'):
-                    self.respond(200, (static / path.rsplit('/', 1)[1]).read_text(), 'text/javascript' if path.endswith('.js') else 'text/css')
+                    self.respond(200, (static / path.rsplit('/', 1)[1]).read_text(encoding='utf-8'), 'text/javascript' if path.endswith('.js') else 'text/css')
                 elif path == '/api/manage': self.respond(200, app.manage())
                 elif path == '/api/desktop/next':
                     if not self.desktop_authorized(): self.respond(403, {'error':'Desktop authorization required'}); return

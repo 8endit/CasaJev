@@ -13,6 +13,9 @@ Geschwindigkeitswerte stammen aus kleinen synthetischen Tests und belegen keinen
 allgemeinen Vorteil gegenüber GPT. Beiträge und reproduzierbare Gegenbeispiele sind
 willkommen; siehe [CONTRIBUTING.md](CONTRIBUTING.md).
 
+Die [Validierungsnotiz vom September 2026](docs/VALIDATION-2026-09-25.md) dokumentiert
+den ursprünglichen Vergleich, spätere Korrekturen, reproduzierbare Prüfungen und Grenzen.
+
 ## Start
 
 ### Desktop auf macOS
